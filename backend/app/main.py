@@ -1,5 +1,3 @@
-import os
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -22,14 +20,10 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS: por defecto acepta cualquier origen (sirve para desarrollo y para Vercel).
-# Para limitarlo en producción, definí FRONTEND_URL en Render (ej: https://mi-app.vercel.app).
-frontend_url = os.getenv("FRONTEND_URL")
-origenes = [frontend_url, "http://localhost:5173"] if frontend_url else ["*"]
-
+# CORS: permitido para Vercel y localhost - FIX para el error 400 en OPTIONS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origenes,
+    allow_origins=["*"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -40,7 +34,6 @@ app.include_router(salones_router, prefix="/api/v1/salones", tags=["Salones"])
 app.include_router(turnos_router, prefix="/api/v1/turnos", tags=["Turnos"])
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(tipos_router, prefix="/api/v1/tipos-evento", tags=["Tipos de evento"])
-
 
 @app.get("/")
 def inicio():
