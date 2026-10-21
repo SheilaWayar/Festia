@@ -5,11 +5,13 @@ from app.core.db import Base, engine, SessionLocal
 from app.api.v1.turnos.router import router as turnos_router
 from app.api.v1.auth.router import router as auth_router
 from app.api.v1.salones.router import router as salones_router, tipos_router
+from app.api.v1.resenas.router import router as resenas_router, resumen_router as resenas_resumen_router
 
 from app.models.turno import TurnoModel  # noqa: F401
 from app.models.salon import SalonModel  # noqa: F401
 from app.models.salon import TipoEvento  # noqa: F401
 from app.models.user import UserModel  # noqa: F401
+from app.models.resena import ResenaModel  # noqa: F401
 from app.core.security import hashear
 
 Base.metadata.create_all(bind=engine)
@@ -41,6 +43,8 @@ seed_datos()
 app = FastAPI(title="Sistema de Reserva de Salones", version="1.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 app.include_router(salones_router, prefix="/api/v1/salones", tags=["Salones"])
+app.include_router(resenas_router, prefix="/api/v1/salones", tags=["Reseñas"])
+app.include_router(resenas_resumen_router, prefix="/api/v1/resenas", tags=["Reseñas"])
 app.include_router(turnos_router, prefix="/api/v1/turnos", tags=["Turnos"])
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(tipos_router, prefix="/api/v1/tipos-evento", tags=["Tipos de evento"])

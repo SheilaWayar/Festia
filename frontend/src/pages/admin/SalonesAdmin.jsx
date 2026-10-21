@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Icono from "../../components/Icono";
 import { salonesApi } from "../../services/salonesApi";
+import { alFallarImagen, fotoDe } from "../../utils/imagenes";
 
 export default function SalonesAdmin() {
   const [salones, setSalones] = useState([]);
@@ -54,14 +55,20 @@ export default function SalonesAdmin() {
         )}
 
         {salones.map((s) => (
-          <article key={s.id} className="turno-card">
+          <article key={s.id} className="turno-card salon-admin-card">
+            <img
+              className="salon-admin-foto"
+              src={fotoDe(s, 0)}
+              alt={`Foto principal de ${s.nombre}`}
+              loading="lazy"
+              onError={alFallarImagen}
+            />
             <div>
               <h3>{s.nombre}</h3>
               <p className="turno-meta">
                 {s.direccion} · Hasta {s.capacidad} · ${s.precio_por_hora?.toLocaleString("es-AR")} por hora
               </p>
             </div>
-            <span></span>
             <div className="turno-acciones">
               <Link className="btn-outline" to={`/admin/salones/${s.id}`}>Editar</Link>
               <button className="btn-danger" type="button" onClick={() => borrar(s)}>Eliminar</button>

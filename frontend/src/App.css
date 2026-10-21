@@ -408,3 +408,540 @@ button.nav-cta { cursor: pointer; background: none; font: inherit; }
 /* ===== Filtro "más recientes" ===== */
 .orden-bar { display: flex; justify-content: flex-end; margin-bottom: 16px; }
 .orden-bar button[aria-pressed="true"] { background: #111; color: #fff; }
+/* ===== Calendario dentro de la tarjeta del salón ===== */
+.cal-en-card { margin: 12px 0; pointer-events: none; }
+.cal-en-card .react-datepicker { width: 100%; font-size: 0.72rem; border-radius: 10px; }
+.cal-en-card .react-datepicker__month-container { width: 100%; float: none; }
+.cal-en-card .react-datepicker__header { padding-top: 6px; }
+.cal-en-card .react-datepicker__current-month { font-size: 0.8rem; text-transform: capitalize; }
+.cal-en-card .react-datepicker__navigation { display: none; }
+.cal-en-card .react-datepicker__day-name,
+.cal-en-card .react-datepicker__day {
+  width: 1.7rem; line-height: 1.7rem; margin: 0.08rem;
+}
+/* Estrellas de solo lectura */
+.estrellas { position: relative; display: inline-block; line-height: 1; white-space: nowrap; vertical-align: middle; }
+.estrellas__fondo { color: rgba(255, 255, 255, .16); }
+.estrellas__relleno { position: absolute; left: 0; top: 0; overflow: hidden; white-space: nowrap; color: var(--gold); }
+
+/* Promedio en la card y en el título del modal */
+.card-rating { display: inline-flex; align-items: center; gap: 7px; margin: 6px 0 2px; color: var(--muted); font-size: 11px; }
+.card-rating strong { color: var(--ink); font-size: 12px; font-weight: 700; }
+
+/* Título + promedio en el modal */
+.modal-salon__titulo-fila { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 16px; }
+.modal-salon__titulo-fila .card-rating { margin: 0; }
+
+/* Pestañas del modal */
+.modal-tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--line); margin: 14px 0 16px; }
+.modal-tabs button { background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 10px 16px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; transition: color .2s ease; }
+.modal-tabs button:hover { color: var(--gold-light); }
+.modal-tabs button.activa { color: var(--gold-light); border-bottom-color: var(--gold); }
+
+/* En la pestaña Reseñas se esconde la foto para que todo entre sin scroll */
+.modal-salon--resenas .modal-salon__foto,
+.modal-salon--resenas .modal-salon__miniaturas { display: none; }
+
+/* Bloque de reseñas */
+.resenas { display: flex; flex-direction: column; gap: 12px; min-height: 250px; }
+.resenas__resumen { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; color: var(--muted); font-size: 12px; }
+.resenas__promedio { font-family: "Cormorant Garamond", serif; font-size: 38px; line-height: 1; font-weight: 600; color: var(--gold-light); }
+.resenas__cta { margin-left: auto; }
+.resenas__cta .primary-button, .resenas__cta .btn-outline { padding: 10px 16px; gap: 14px; }
+.resenas__cta .text-button { padding: 0; width: auto; gap: 10px; }
+.resenas__motivo { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.resenas__lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; transition: opacity .15s ease; }
+.resenas__lista.cargando { opacity: .45; }
+.resena { border: 1px solid var(--line); background: var(--surface); padding: 10px 14px; }
+.resena__cabecera { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; font-size: 12px; color: var(--ink); }
+.resena__fecha { color: var(--muted); font-size: 10px; letter-spacing: .04em; }
+.resena__borrar { margin-left: auto; padding: 4px 10px; font-size: 10px; }
+.resena__texto { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.resenas__paginas { display: flex; align-items: center; justify-content: center; gap: 14px; color: var(--muted); font-size: 11px; }
+.resenas__paginas .btn-outline { padding: 7px 14px; font-size: 11px; }
+.resenas__paginas .btn-outline:disabled { opacity: .4; cursor: not-allowed; }
+.resenas-error { margin: 0; color: #ff9a8f; font-size: 12px; }
+
+/* Formulario */
+.resenas-form h4 { margin: 0; font-family: "Cormorant Garamond", serif; font-size: 26px; font-weight: 500; color: var(--ink); }
+.resenas-form textarea { width: 100%; resize: none; padding: 12px 14px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); outline: none; font-size: 13px; line-height: 1.6; }
+.resenas-form textarea:focus { border-color: var(--gold); }
+.resenas-form textarea::placeholder { color: var(--muted); }
+.resenas-form__estrellas { display: flex; gap: 4px; }
+.resenas-form__estrellas button { background: none; border: 0; padding: 0 2px; font-size: 34px; line-height: 1; color: rgba(255, 255, 255, .16); cursor: pointer; transition: transform .15s ease, color .15s ease; }
+.resenas-form__estrellas button.on { color: var(--gold); }
+.resenas-form__estrellas button:hover { transform: scale(1.12); }
+.resenas-form__contador { align-self: flex-end; color: var(--muted); font-size: 10px; }
+.resenas-form__acciones { display: flex; justify-content: flex-end; gap: 10px; }
+.resenas-form__acciones .btn-outline, .resenas-form__acciones .primary-button { padding: 12px 18px; }
+.resenas-form__acciones button:disabled { opacity: .5; cursor: not-allowed; }
+/* ===== Calendario de disponibilidad dentro del modal (agregar al FINAL de src/App.css) ===== */
+.modal-salon__info { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 22px; align-items: start; }
+.modal-salon__info-texto { min-width: 0; }
+.modal-salon__calendario { display: flex; flex-direction: column; gap: 8px; }
+.modal-salon__calendario-titulo { color: var(--gold-light); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+@media (max-width: 760px) {
+  .modal-salon__info { grid-template-columns: 1fr; }
+}
+/* ===== Layout de administración ===== */
+.admin-shell {
+  min-height: 100dvh;
+  background: var(--surface);
+  color: var(--ink);
+}
+
+/* Header sticky */
+.admin-header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 24px;
+  background: var(--emerald-dark);
+  border-bottom: 1px solid var(--line);
+}
+
+.admin-header-left,
+.admin-header-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-header-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.admin-header-nav a {
+  padding: 8px 14px;
+  border-radius: 8px;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.92rem;
+  text-decoration: none;
+  transition: color 0.15s, background 0.15s;
+}
+
+.admin-header-nav a:hover,
+.admin-header-nav a.active {
+  color: var(--gold-light);
+  background: rgba(195, 166, 104, 0.1);
+}
+
+.admin-user-name {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.admin-logout {
+  padding: 8px 16px;
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--gold-light);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.admin-logout:hover {
+  background: rgba(195, 166, 104, 0.14);
+}
+
+.admin-menu-button {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+/* Cuerpo: sidebar + contenido */
+.admin-body {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  align-items: start;
+}
+
+/* Sidebar sticky (el scroll va solo dentro del sidebar) */
+.admin-sidebar {
+  position: sticky;
+  top: 64px;
+  height: calc(100dvh - 64px);
+  overflow-y: auto;
+  padding: 24px 16px;
+  background: var(--emerald-dark);
+  border-right: 1px solid var(--line);
+}
+
+.admin-sidebar-title {
+  margin: 0 0 10px 12px;
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.admin-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-sidebar-nav a {
+  padding: 11px 14px;
+  border-radius: 8px;
+  border-left: 3px solid transparent;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: color 0.15s, background 0.15s;
+}
+
+.admin-sidebar-nav a:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.admin-sidebar-nav a.active {
+  color: var(--gold-light);
+  background: rgba(195, 166, 104, 0.12);
+  border-left-color: var(--gold);
+}
+
+.admin-sidebar-extra {
+  display: none;
+  margin-top: 28px;
+}
+
+.admin-main {
+  min-width: 0;
+  min-height: calc(100dvh - 64px);
+}
+
+.admin-overlay {
+  display: none;
+}
+
+/* Móvil: el sidebar se abre con el botón ☰ */
+@media (max-width: 860px) {
+  .admin-header {
+    padding: 0 14px;
+  }
+
+  .admin-header-nav,
+  .admin-user-name {
+    display: none;
+  }
+
+  .admin-menu-button {
+    display: inline-flex;
+  }
+
+  .admin-body {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-sidebar {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    bottom: 0;
+    z-index: 55;
+    width: 260px;
+    height: auto;
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+  }
+
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .admin-sidebar-extra {
+    display: block;
+  }
+
+  .admin-overlay {
+    display: block;
+    position: fixed;
+    inset: 64px 0 0 0;
+    z-index: 54;
+    background: rgba(0, 0, 0, 0.55);
+  }
+}
+/* ===== Foto principal en la lista de salones del admin ===== */
+.turno-card.salon-admin-card {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+}
+
+.salon-admin-foto {
+  width: 120px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface-raised);
+}
+
+@media (max-width: 640px) {
+  .turno-card.salon-admin-card {
+    grid-template-columns: 88px minmax(0, 1fr);
+  }
+  .salon-admin-foto {
+    width: 88px;
+    height: 66px;
+  }
+  .salon-admin-card .turno-acciones {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ===== Modal del salón: entra en pantalla y es responsive ===== */
+.modal-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.modal-overlay .modal-content.modal-salon {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 42%) minmax(0, 1fr);
+  width: min(1080px, 100%);
+  max-width: none;
+  height: min(680px, calc(100dvh - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.modal-salon .btn-cerrar {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+}
+
+/* Columna de la foto */
+.modal-salon__galeria {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: var(--emerald-dark);
+}
+
+.modal-overlay .modal-salon__foto {
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  height: auto;
+  max-height: none;
+  aspect-ratio: auto;
+  object-fit: cover;
+  display: block;
+  border-radius: 0;
+}
+
+.modal-overlay .modal-salon__miniaturas {
+  flex: none;
+  display: flex;
+  gap: 6px;
+  padding: 8px;
+  overflow-x: auto;
+}
+
+.modal-salon__miniaturas button {
+  flex: none;
+  width: 56px;
+  height: 40px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  overflow: hidden;
+  background: none;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.modal-salon__miniaturas button.activa {
+  border-color: var(--gold);
+  opacity: 1;
+}
+
+.modal-salon__miniaturas img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Columna de la información */
+.modal-overlay .modal-salon__cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  min-width: 0;
+  padding: 20px 24px;
+}
+
+.modal-salon__titulo-fila {
+  flex: none;
+  padding-right: 36px; /* lugar para la X */
+}
+
+.modal-salon .modal-tabs {
+  flex: none;
+}
+
+/* Solo esta zona scrollea si el contenido no entra */
+.modal-salon__contenido {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.modal-salon__info {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 270px;
+  gap: 16px;
+  align-items: start;
+}
+
+.modal-salon__desc {
+  margin: 0 0 10px;
+  font-size: 0.92rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Calendario compacto dentro del modal */
+.modal-salon .cal-en-card .react-datepicker {
+  width: 100%;
+  font-size: 0.78rem;
+}
+
+.modal-salon .cal-en-card .react-datepicker__month-container {
+  width: 100%;
+}
+
+.modal-salon .cal-en-card .react-datepicker__day,
+.modal-salon .cal-en-card .react-datepicker__day-name {
+  width: 1.9rem;
+  line-height: 1.9rem;
+  margin: 0.1rem;
+}
+
+.modal-salon__pie {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.modal-salon__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Celular y tablet: una sola columna */
+@media (max-width: 900px) {
+  .modal-overlay {
+    padding: 12px;
+  }
+
+  .modal-overlay .modal-content.modal-salon {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    height: auto;
+    max-height: calc(100dvh - 24px);
+  }
+
+  .modal-salon__galeria {
+    height: clamp(110px, 24dvh, 220px);
+  }
+
+  .modal-overlay .modal-salon__miniaturas {
+    display: none;
+  }
+
+  .modal-overlay .modal-salon__cuerpo {
+    padding: 14px 16px;
+    gap: 10px;
+  }
+
+  .modal-salon__info {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-salon__pie {
+    flex-wrap: wrap;
+  }
+
+  .modal-salon__acciones {
+    width: 100%;
+  }
+
+  .modal-salon__acciones > * {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+  }
+}
+/* ===== Calendario en la página completa del salón ===== */
+.detalle-calendario {
+  margin-top: 28px;
+}
+
+.detalle-calendario h3 {
+  margin: 0 0 6px;
+}
+
+.detalle-calendario__ayuda {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.detalle-calendario .cal-en-card {
+  max-width: 340px;
+}
+
+.detalle-calendario .cal-en-card .react-datepicker {
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .detalle-calendario .cal-en-card {
+    max-width: 100%;
+  }
+}

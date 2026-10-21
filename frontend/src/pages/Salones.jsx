@@ -5,11 +5,12 @@ import SalonCard from "../components/SalonCard";
 import SalonModal from "../components/SalonModal";
 import Contacto from "../components/Contacto";
 import Icono from "../components/Icono";
+import Carrusel from "../components/Carrusel";
 import { useSalones } from "../hooks/useSalones";
 import { HERO } from "../utils/imagenes";
 
 export default function Salones() {
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const { hash } = useLocation();
   const [seleccionado, setSeleccionado] = useState(null); // salón abierto en la tarjeta grande
   const cerrar = useCallback(() => setSeleccionado(null), []);
@@ -22,6 +23,29 @@ export default function Salones() {
   const { salones, cargando, error } = useSalones(filtros);
   const hayFiltros = Object.values(filtros).some(Boolean);
 
+  // Más recientes: los salones cargados después tienen id mayor
+  const recientes = params.get("orden") === "recientes";
+  const lista = recientes ? [...salones].sort((a, b) => b.id - a.id) : salones;
+
+  const alternarOrden = () =>
+    setParams(
+      (prev) => {
+        const n = new URLSearchParams(prev);
+        if (n.get("orden") === "recientes") n.delete("orden");
+        else n.set("orden", "recientes");
+        return n;
+      },
+      { replace: true }
+    );
+
+  // Imágenes del carrusel: fotos de los salones + la imagen de siempre
+  const deSalones = salones
+    .flatMap((s) => (Array.isArray(s.imagenes) ? s.imagenes : []))
+    .map((x) => (typeof x === "string" ? x : x?.url))
+    .filter(Boolean);
+  const fotos = [...new Set([...deSalones, HERO])].slice(0, 6);
+  console.log("FOTOS:", fotos);
+
   // Para que "Contacto" del menú lleve a la sección aunque se venga de otra pantalla
   useEffect(() => {
     if (hash) document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: "smooth" });
@@ -30,7 +54,10 @@ export default function Salones() {
   return (
     <>
       <section className="hero" id="inicio">
-        <img src={HERO} alt="Salón elegante preparado para una celebración" />
+        <Carrusel
+          imagenes={fotos}
+          alt="Salón preparado para una celebración"
+        />
         <div className="hero-overlay"></div>
         <div className="hero-content">
           <span className="eyebrow light">Espacios extraordinarios</span>
@@ -53,6 +80,17 @@ export default function Salones() {
           <p>Cada salón ha sido elegido por su belleza, servicio excepcional y capacidad para crear momentos únicos.</p>
         </div>
 
+        <div className="orden-bar">
+          <button
+            type="button"
+            className="btn-outline"
+            aria-pressed={recientes}
+            onClick={alternarOrden}
+          >
+            Más recientes
+          </button>
+        </div>
+
         <div className="venue-grid">
           {cargando && <p className="empty-state">Cargando salones...</p>}
           {error && <p className="empty-state">Error al cargar los salones: {error}</p>}
@@ -63,7 +101,7 @@ export default function Salones() {
                 : "Todavía no hay salones cargados."}
             </p>
           )}
-          {salones.map((s) => (
+          {lista.map((s) => (
             <SalonCard key={s.id} salon={s} onAbrir={setSeleccionado} />
           ))}
         </div>

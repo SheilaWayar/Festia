@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import GaleriaSalon from "../components/GaleriaSalon";
+import CalendarioSalon from "../components/CalendarioSalon";
 import Icono from "../components/Icono";
 import { salonesApi } from "../services/salonesApi";
 
@@ -52,6 +53,16 @@ export default function SalonDetalle() {
           </div>
 
           {salon.direccion && <p className="detalle-direccion">Dirección: {salon.direccion}</p>}
+
+          <div className="detalle-calendario">
+            <h3>Disponibilidad</h3>
+            <p className="detalle-calendario__ayuda">
+              Los días tachados están completos. Los resaltados tienen alguna reserva.
+            </p>
+            <div className="cal-en-card" aria-label={`Disponibilidad de ${salon.nombre}`}>
+              <CalendarioSalon salonId={salon.id} inline />
+            </div>
+          </div>
         </div>
 
         <aside className="booking-card">
