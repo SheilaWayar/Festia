@@ -12,6 +12,13 @@ import PanelAdmin from "./pages/admin/PanelAdmin";
 import SalonesAdmin from "./pages/admin/SalonesAdmin";
 import SalonForm from "./pages/admin/SalonForm";
 import TurnosAdmin from "./pages/admin/TurnosAdmin";
+import Administradores from './admin/Administradores'
+import AdminLayout from './admin/AdminLayout'
+import RequireAdmin from './admin/RequireAdmin'
+
+<Route path='/admin' element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
+  <Route path='administradores' element={<Administradores />} />
+</Route>
 
 export default function App() {
   return (
