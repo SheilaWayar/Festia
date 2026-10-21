@@ -17,46 +17,29 @@ Base.metadata.create_all(bind=engine)
 def seed_datos():
     db = SessionLocal()
     try:
-        # 1. Tipos
         if db.query(TipoEvento).count() == 0:
-            nombres = ["Casamiento", "Cumpleaños", "15 Años", "Corporativo", "Bautismo"]
-            for n in nombres:
+            for n in ["Casamiento", "Cumpleaños", "15 Años", "Corporativo", "Bautismo"]:
                 db.add(TipoEvento(nombre=n))
             db.commit()
-            print(">>> Tipos creados")
-        
-        # 2. Admin
-        admin_email = "admin@festia.com"
-        if not db.query(UserModel).filter(UserModel.email == admin_email).first():
-            admin = UserModel(
-                nombre="Admin Festia",
-                email=admin_email,
-                password_hash=hashear("admin123"),
-                rol="admin"
-            )
-            db.add(admin)
+
+        # Asegurar que admin@test.com sea admin y pass admin123
+        for email in ["admin@test.com", "admin@festia.com"]:
+            u = db.query(UserModel).filter(UserModel.email == email).first()
+            if not u:
+                u = UserModel(nombre="Admin Festia", email=email, password_hash=hashear("admin123"), rol="admin")
+                db.add(u)
+            else:
+                u.password_hash = hashear("admin123")
+                u.rol = "admin"
             db.commit()
-            print(f">>> Admin creado: {admin_email} / admin123")
-    except Exception as e:
-        print(f"Error en seed: {e}")
+            print(f">>> Admin OK: {email} / admin123")
     finally:
         db.close()
 
 seed_datos()
 
-app = FastAPI(
-    title="Sistema de Reserva de Salones",
-    version="1.0.0",
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
+app = FastAPI(title="Sistema de Reserva de Salones", version="1.0.0")
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 app.include_router(salones_router, prefix="/api/v1/salones", tags=["Salones"])
 app.include_router(turnos_router, prefix="/api/v1/turnos", tags=["Turnos"])
 app.include_router(auth_router, prefix="/api/v1")
