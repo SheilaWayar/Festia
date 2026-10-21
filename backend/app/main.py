@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.db import Base, engine
+from app.core.db import Base, engine, SessionLocal
 from app.api.v1.turnos.router import router as turnos_router
 from app.api.v1.auth.router import router as auth_router
 from app.api.v1.salones.router import router as salones_router, tipos_router
@@ -9,10 +9,28 @@ from app.api.v1.salones.router import router as salones_router, tipos_router
 # Importar los modelos hace que SQLAlchemy conozca todas las tablas antes de crearlas
 from app.models.turno import TurnoModel  # noqa: F401
 from app.models.salon import SalonModel  # noqa: F401
+from app.models.salon import TipoEvento  # noqa: F401
 from app.models.user import UserModel  # noqa: F401
 
 # Crear automáticamente las tablas en la BD si no existen
 Base.metadata.create_all(bind=engine)
+
+# --- AUTO-SEED: Si no hay tipos, los crea. Soluciona el [] en Render ---
+def seed_tipos():
+    db = SessionLocal()
+    try:
+        if db.query(TipoEvento).count() == 0:
+            nombres = ["Casamiento", "Cumpleaños", "15 Años", "Corporativo", "Bautismo"]
+            for n in nombres:
+                db.add(TipoEvento(nombre=n))
+            db.commit()
+            print(">>> Tipos de evento creados automáticamente")
+    except Exception as e:
+        print(f"Error en seed_tipos: {e}")
+    finally:
+        db.close()
+
+seed_tipos()
 
 app = FastAPI(
     title="Sistema de Reserva de Salones",
