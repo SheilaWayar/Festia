@@ -6,39 +6,49 @@ from app.api.v1.turnos.router import router as turnos_router
 from app.api.v1.auth.router import router as auth_router
 from app.api.v1.salones.router import router as salones_router, tipos_router
 
-# Importar los modelos hace que SQLAlchemy conozca todas las tablas antes de crearlas
 from app.models.turno import TurnoModel  # noqa: F401
 from app.models.salon import SalonModel  # noqa: F401
 from app.models.salon import TipoEvento  # noqa: F401
 from app.models.user import UserModel  # noqa: F401
+from app.core.security import hashear
 
-# Crear automáticamente las tablas en la BD si no existen
 Base.metadata.create_all(bind=engine)
 
-# --- AUTO-SEED: Si no hay tipos, los crea. Soluciona el [] en Render ---
-def seed_tipos():
+def seed_datos():
     db = SessionLocal()
     try:
+        # 1. Tipos
         if db.query(TipoEvento).count() == 0:
             nombres = ["Casamiento", "Cumpleaños", "15 Años", "Corporativo", "Bautismo"]
             for n in nombres:
                 db.add(TipoEvento(nombre=n))
             db.commit()
-            print(">>> Tipos de evento creados automáticamente")
+            print(">>> Tipos creados")
+        
+        # 2. Admin
+        admin_email = "admin@festia.com"
+        if not db.query(UserModel).filter(UserModel.email == admin_email).first():
+            admin = UserModel(
+                nombre="Admin Festia",
+                email=admin_email,
+                password_hash=hashear("admin123"),
+                rol="admin"
+            )
+            db.add(admin)
+            db.commit()
+            print(f">>> Admin creado: {admin_email} / admin123")
     except Exception as e:
-        print(f"Error en seed_tipos: {e}")
+        print(f"Error en seed: {e}")
     finally:
         db.close()
 
-seed_tipos()
+seed_datos()
 
 app = FastAPI(
     title="Sistema de Reserva de Salones",
-    description="API REST modularizada para la gestión de salones y turnos.",
     version="1.0.0",
 )
 
-# CORS: permitido para Vercel y localhost - FIX para el error 400 en OPTIONS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -47,7 +57,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Incluir las rutas
 app.include_router(salones_router, prefix="/api/v1/salones", tags=["Salones"])
 app.include_router(turnos_router, prefix="/api/v1/turnos", tags=["Turnos"])
 app.include_router(auth_router, prefix="/api/v1")
