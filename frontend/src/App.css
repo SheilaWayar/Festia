@@ -945,3 +945,74 @@ button.nav-cta { cursor: pointer; background: none; font: inherit; }
     max-width: 100%;
   }
 }
+/* ===== Modal del salón: sin scroll ===== */
+.modal-overlay {
+  overflow: hidden !important;
+  align-items: center !important;
+}
+
+.modal-overlay .modal-content.modal-salon {
+  overflow: hidden !important;
+  height: min(620px, calc(100dvh - 24px)) !important;
+  max-height: calc(100dvh - 24px) !important;
+}
+
+.modal-overlay .modal-salon__cuerpo {
+  overflow: hidden !important;
+  padding: 16px 20px !important;
+  gap: 8px !important;
+}
+
+/* La zona del medio no scrollea en la pestaña Información */
+.modal-salon:not(.modal-salon--resenas) .modal-salon__contenido {
+  overflow: hidden !important;
+}
+
+/* Descripción corta y amenities compactos */
+.modal-salon__desc {
+  -webkit-line-clamp: 3 !important;
+  font-size: 0.85rem !important;
+  margin-bottom: 6px !important;
+}
+
+.modal-salon .amenities {
+  gap: 4px 10px !important;
+  font-size: 0.8rem !important;
+}
+
+/* Calendario más chico */
+.modal-salon .cal-en-card .react-datepicker__header {
+  padding-top: 4px !important;
+}
+
+.modal-salon .cal-en-card .react-datepicker__day,
+.modal-salon .cal-en-card .react-datepicker__day-name {
+  width: 1.6rem !important;
+  line-height: 1.6rem !important;
+  margin: 0.08rem !important;
+  font-size: 0.74rem !important;
+}
+
+.modal-salon__calendario-titulo {
+  font-size: 0.72rem !important;
+}
+
+/* El pie siempre visible, más bajo */
+.modal-salon__pie {
+  padding-top: 8px !important;
+}
+
+/* Reseñas: solo scrollea la lista, nunca el modal entero */
+.modal-salon--resenas .modal-salon__contenido {
+  overflow-y: auto !important;
+}
+
+/* Celular: foto más baja para que entre todo */
+@media (max-width: 900px) {
+  .modal-overlay .modal-content.modal-salon {
+    height: calc(100dvh - 24px) !important;
+  }
+  .modal-salon__galeria {
+    height: clamp(90px, 18dvh, 150px) !important;
+  }
+}
