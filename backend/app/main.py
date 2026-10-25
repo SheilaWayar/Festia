@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -10,8 +11,9 @@ from app.api.v1.resenas.router import router as resenas_router, resumen_router a
 from app.models.turno import TurnoModel  # noqa: F401
 from app.models.salon import SalonModel  # noqa: F401
 from app.models.salon import TipoEvento  # noqa: F401
-from app.models.user import UserModel  # noqa: F401
+from app.models.user import UserModel, SalonAdminModel  # noqa: F401
 from app.models.resena import ResenaModel  # noqa: F401
+from app.models.extra import PagoTurnoModel, CalificacionUsuarioModel, NotificacionModel  # noqa: F401
 from app.core.security import hashear
 
 Base.metadata.create_all(bind=engine)
@@ -38,7 +40,12 @@ def seed_datos():
     finally:
         db.close()
 
-seed_datos()
+
+if os.getenv("SEED_ADMINS", "false").lower() == "true":
+    print("🌱 Ejecutando seed de datos y administradores...")
+    seed_datos()
+else:
+    print("🔒 Seed de administradores omitido (SEED_ADMINS no está activo)")
 
 app = FastAPI(title="Sistema de Reserva de Salones", version="1.0.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
