@@ -27,9 +27,12 @@ export function AuthProvider({ children }) {
     setSesion(null);
   }
 
+  const esAdmin = sesion?.rol === "admin" || sesion?.rol === "superadmin";
+  const esSuperadmin = sesion?.rol === "superadmin";
+
   return (
     <AuthContext.Provider
-      value={{ sesion, esAdmin: sesion?.rol === "admin", iniciarSesion, cerrarSesion }}
+      value={{ sesion, esAdmin, esSuperadmin, iniciarSesion, cerrarSesion }}
     >
       {children}
     </AuthContext.Provider>
