@@ -21,20 +21,29 @@ const fechaLarga = (iso) =>
 
 export default function MisTurnos() {
   const [turnos, setTurnos] = useState([]);
-  const [cargando, setCargando] = useState(true);
+  const [cargando, setCargando] = useState(true); // arranca en true: la primera carga ya está "cargando"
   const [error, setError] = useState(null);
   const [mensaje, setMensaje] = useState({ texto: "", ok: false });
   const [cancelando, setCancelando] = useState(null);
 
-  function cargar() {
-    setCargando(true);
-    setError(null);
-    turnosApi.mios().then(setTurnos).catch((e) => setError(e.message)).finally(() => setCargando(false));
+  // Pide los turnos. No cambia estados de forma inmediata, solo cuando responde el servidor.
+  function traer() {
+    return turnosApi
+      .mios()
+      .then(setTurnos)
+      .catch((e) => setError(e.message))
+      .finally(() => setCargando(false));
   }
 
   useEffect(() => {
-    cargar();
+    traer();
   }, []);
+
+  function reintentar() {
+    setCargando(true);
+    setError(null);
+    traer();
+  }
 
   async function cancelar(t) {
     if (!window.confirm(`¿Cancelar tu turno en ${t.salon_nombre}?`)) return;
@@ -66,7 +75,7 @@ export default function MisTurnos() {
         {error && (
           <div className="state-box">
             <p>{error}</p>
-            <button className="btn-outline" type="button" onClick={cargar}>Reintentar</button>
+            <button className="btn-outline" type="button" onClick={reintentar}>Reintentar</button>
           </div>
         )}
 

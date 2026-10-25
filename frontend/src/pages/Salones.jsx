@@ -3,6 +3,7 @@ import { useLocation, useSearchParams } from "react-router-dom";
 import BuscadorSalones from "../components/BuscadorSalones";
 import SalonCard from "../components/SalonCard";
 import SalonModal from "../components/SalonModal";
+import NovedadesSalones from "../components/NovedadesSalones";
 import Contacto from "../components/Contacto";
 import Icono from "../components/Icono";
 import { useSalones } from "../hooks/useSalones";
@@ -43,6 +44,10 @@ export default function Salones() {
       </section>
 
       <BuscadorSalones />
+
+      {!hayFiltros && !cargando && !error && (
+        <NovedadesSalones salones={salones} onAbrir={setSeleccionado} />
+      )}
 
       <section className="section venues-section" id="salones">
         <div className="section-heading">
