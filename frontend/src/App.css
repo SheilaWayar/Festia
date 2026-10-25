@@ -377,3 +377,6 @@ button.nav-cta { cursor: pointer; background: none; font: inherit; }
 .reserva-resumen { border: 1px solid var(--line); background: var(--surface); padding: 14px 16px; margin: 0 0 18px; display: grid; gap: 4px; }
 .reserva-resumen strong { font-family: "Cormorant Garamond", serif; font-size: 26px; font-weight: 500; }
 .reserva-resumen span { color: var(--muted); font-size: 12px; }
+.resumen-anticipo { margin: 16px 0; padding: 14px 16px; border-radius: 10px; background: rgba(0, 0, 0, 0.05); }
+.resumen-anticipo p { margin: 4px 0; }
+.resumen-nota { font-size: 0.85rem; opacity: 0.7; }
