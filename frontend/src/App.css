@@ -945,3 +945,6 @@ button.nav-cta { cursor: pointer; background: none; font: inherit; }
     max-width: 100%;
   }
 }
+/* Estados nuevos de un turno */
+.badge-finalizado { background: rgba(46, 160, 90, 0.18); color: #1f7a45; }
+.badge-rechazado { background: rgba(214, 69, 69, 0.18); color: #b53030; } 
