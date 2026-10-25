@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { turnosApi } from "../../services/turnosApi";
 import { salonesApi } from "../../services/salonesApi";
+import ModalAccion from "../../components/ModalAccion";
 
 const ESTADOS = {
   pendiente: "Pendiente",
@@ -11,6 +13,13 @@ const ESTADOS = {
 };
 const ESTADOS_PAGO = { sin_pago: "Sin pago", parcial: "Anticipo pagado", pagado: "Pagado" };
 const DEPOSITO = { pendiente: "En custodia", liberado: "Liberado", retenido: "Retenido" };
+const TITULOS = {
+  rechazar: "Rechazar pedido",
+  finalizar: "Finalizar evento",
+  pago: "Registrar pago manual",
+};
+
+const FORM_VACIO = { motivo: "", deposito: "liberado", comentario: "", monto: "", metodo: "efectivo" };
 
 const yaTermino = (t) => new Date(`${t.fecha}T${t.hora_fin}`) <= new Date();
 
@@ -20,6 +29,12 @@ export default function TurnosAdmin() {
   const [filtros, setFiltros] = useState({ salon_id: "", fecha: "", estado: "" });
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
+
+  // Ventana de acción: { tipo: "rechazar" | "finalizar" | "pago", turno }
+  const [modal, setModal] = useState(null);
+  const [form, setForm] = useState(FORM_VACIO);
+  const [errorModal, setErrorModal] = useState(null);
+  const [enviando, setEnviando] = useState(false);
 
   useEffect(() => {
     salonesApi.listar().then(setSalones).catch(() => setSalones([]));
@@ -38,6 +53,7 @@ export default function TurnosAdmin() {
   }, [filtros]);
 
   const cambiar = (e) => setFiltros({ ...filtros, [e.target.name]: e.target.value });
+  const cambiarForm = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   async function ejecutar(accion) {
     try {
@@ -48,23 +64,51 @@ export default function TurnosAdmin() {
     }
   }
 
-  const confirmar = (id) => ejecutar(() => turnosApi.confirmar(id));
+  // Mientras el backend nuevo no esté, Confirmar usa el endpoint viejo.
+  // Cuando exista PATCH /turnos/{id}/confirmar, cambiar por: turnosApi.confirmar(id)
+  const confirmar = (id) => ejecutar(() => turnosApi.cambiarEstado(id, "confirmado"));
   const cancelar = (id) => ejecutar(() => turnosApi.cambiarEstado(id, "cancelado"));
 
-  function rechazar(id) {
-    const motivo = window.prompt("Motivo del rechazo (mínimo 3 caracteres)");
-    if (!motivo) return;
-    ejecutar(() => turnosApi.rechazar(id, motivo));
+  function abrirModal(tipo, turno) {
+    setForm(FORM_VACIO);
+    setErrorModal(null);
+    setModal({ tipo, turno });
   }
 
-  function finalizar(id) {
-    const liberar = window.confirm(
-      "¿Liberar el depósito?\nAceptar = liberar. Cancelar = no liberar (hay que explicar el motivo)."
-    );
-    if (liberar) return ejecutar(() => turnosApi.finalizar(id, "liberado", null));
-    const motivo = window.prompt("Motivo por el que no se libera el depósito (mínimo 10 caracteres)");
-    if (!motivo) return;
-    ejecutar(() => turnosApi.finalizar(id, "retenido", motivo));
+  function cerrarModal() {
+    if (!enviando) setModal(null);
+  }
+
+  async function enviarModal(e) {
+    e.preventDefault();
+    const { tipo, turno } = modal;
+    const comentario = form.comentario.trim();
+    setErrorModal(null);
+
+    if (tipo === "rechazar" && form.motivo.trim().length < 3) {
+      return setErrorModal("El motivo debe tener al menos 3 caracteres.");
+    }
+    if (tipo === "finalizar" && form.deposito === "retenido" && comentario.length < 10) {
+      return setErrorModal("Para no liberar el depósito explicá el motivo (mínimo 10 caracteres).");
+    }
+    if (tipo === "pago" && !(Number(form.monto) > 0)) {
+      return setErrorModal("Ingresá un monto mayor a 0.");
+    }
+
+    setEnviando(true);
+    try {
+      if (tipo === "rechazar") await turnosApi.rechazar(turno.id, form.motivo.trim());
+      if (tipo === "finalizar") await turnosApi.finalizar(turno.id, form.deposito, comentario || null);
+      if (tipo === "pago") {
+        await turnosApi.pagoManual(turno.id, { monto: Number(form.monto), metodo: form.metodo });
+      }
+      setModal(null);
+      cargar();
+    } catch (err) {
+      setErrorModal(err.message);
+    } finally {
+      setEnviando(false);
+    }
   }
 
   return (
@@ -86,6 +130,11 @@ export default function TurnosAdmin() {
             <option key={valor} value={valor}>{texto}</option>
           ))}
         </select>
+        {filtros.salon_id && (
+          <Link className="btn-outline" to={`/admin/salones/${filtros.salon_id}/historial`}>
+            Ver historial del salón
+          </Link>
+        )}
       </div>
 
       <section className="turnos-list" aria-live="polite">
@@ -119,11 +168,18 @@ export default function TurnosAdmin() {
               {t.estado === "pendiente" && (
                 <>
                   <button className="btn-outline" type="button" onClick={() => confirmar(t.id)}>Confirmar</button>
-                  <button className="btn-danger" type="button" onClick={() => rechazar(t.id)}>Rechazar</button>
+                  <button className="btn-danger" type="button" onClick={() => abrirModal("rechazar", t)}>Rechazar</button>
                 </>
               )}
               {t.estado === "confirmado" && yaTermino(t) && (
-                <button className="btn-outline" type="button" onClick={() => finalizar(t.id)}>Finalizar evento</button>
+                <button className="btn-outline" type="button" onClick={() => abrirModal("finalizar", t)}>
+                  Finalizar evento
+                </button>
+              )}
+              {["confirmado", "finalizado"].includes(t.estado) && t.monto_total > 0 && t.estado_pago !== "pagado" && (
+                <button className="btn-outline" type="button" onClick={() => abrirModal("pago", t)}>
+                  Registrar pago
+                </button>
               )}
               {["pendiente", "confirmado"].includes(t.estado) && (
                 <button className="btn-danger" type="button" onClick={() => cancelar(t.id)}>Cancelar</button>
@@ -132,6 +188,70 @@ export default function TurnosAdmin() {
           </article>
         ))}
       </section>
+
+      {modal && (
+        <ModalAccion titulo={TITULOS[modal.tipo]} onCerrar={cerrarModal}>
+          <p className="turno-meta">
+            {modal.turno.salon_nombre} · {modal.turno.fecha} · {modal.turno.usuario_email}
+          </p>
+          <form onSubmit={enviarModal}>
+            {modal.tipo === "rechazar" && (
+              <label className="accion-campo">
+                Motivo del rechazo (mínimo 3 caracteres)
+                <textarea name="motivo" rows={3} value={form.motivo} onChange={cambiarForm} />
+              </label>
+            )}
+
+            {modal.tipo === "finalizar" && (
+              <>
+                <label className="accion-opcion">
+                  <input type="radio" name="deposito" value="liberado"
+                    checked={form.deposito === "liberado"} onChange={cambiarForm} />
+                  <span>Liberar depósito</span>
+                </label>
+                <label className="accion-opcion">
+                  <input type="radio" name="deposito" value="retenido"
+                    checked={form.deposito === "retenido"} onChange={cambiarForm} />
+                  <span>No liberar depósito</span>
+                </label>
+                <label className="accion-campo">
+                  {form.deposito === "retenido"
+                    ? "Motivo (obligatorio, mínimo 10 caracteres)"
+                    : "Comentario (opcional)"}
+                  <textarea name="comentario" rows={3} value={form.comentario} onChange={cambiarForm} />
+                </label>
+              </>
+            )}
+
+            {modal.tipo === "pago" && (
+              <>
+                <label className="accion-campo">
+                  Monto cobrado ($)
+                  <input type="number" name="monto" min="0" step="0.01" value={form.monto} onChange={cambiarForm} />
+                </label>
+                <label className="accion-campo">
+                  Método
+                  <select name="metodo" value={form.metodo} onChange={cambiarForm}>
+                    <option value="efectivo">Efectivo</option>
+                    <option value="transferencia">Transferencia</option>
+                  </select>
+                </label>
+              </>
+            )}
+
+            {errorModal && <p className="accion-error" role="alert">{errorModal}</p>}
+
+            <div className="accion-botones">
+              <button className="btn-outline" type="button" onClick={cerrarModal} disabled={enviando}>
+                Volver
+              </button>
+              <button className="btn-danger" type="submit" disabled={enviando}>
+                {enviando ? "Guardando..." : "Confirmar"}
+              </button>
+            </div>
+          </form>
+        </ModalAccion>
+      )}
     </>
   );
-} 
+}  
