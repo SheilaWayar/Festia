@@ -1058,3 +1058,5 @@ button.nav-cta { cursor: pointer; background: none; font: inherit; }
     height: clamp(90px, 18dvh, 150px) !important;
   }
 }
+.btn-whatsapp { border-color: #25d366; color: #25d366; text-decoration: none; display: inline-block; }
+.btn-whatsapp:hover { background: rgba(37, 211, 102, 0.12); }

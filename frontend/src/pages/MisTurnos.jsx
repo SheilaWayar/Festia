@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { turnosApi } from "../services/turnosApi";
+import BotonWhatsapp from "../components/BotonWhatsapp";
+import { useAuth } from "../context/AuthContext";
 
 const ESTADOS = {
   pendiente: "Pendiente",
@@ -20,6 +22,7 @@ const fechaLarga = (iso) =>
   });
 
 export default function MisTurnos() {
+  const { sesion } = useAuth();
   const [turnos, setTurnos] = useState([]);
   const [cargando, setCargando] = useState(true); // arranca en true: la primera carga ya está "cargando"
   const [error, setError] = useState(null);
@@ -110,6 +113,10 @@ export default function MisTurnos() {
                 )}
                 {t.comentario_deposito && (
                   <p className="turno-meta">Comentario del salón sobre el depósito: {t.comentario_deposito}</p>
+                )}
+
+                {t.estado === "confirmado" && (
+                  <BotonWhatsapp turno={t} nombreUsuario={sesion?.nombre} />
                 )}
               </div>
               <span className={`badge badge-${t.estado}`}>{ESTADOS[t.estado] ?? t.estado}</span>
