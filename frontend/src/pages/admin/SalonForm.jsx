@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { salonesApi } from "../../services/salonesApi";
+import { normalizarWhatsapp } from "../../utils/whatsapp"; 
 
 const VACIO = {
   nombre: "",
@@ -11,6 +12,7 @@ const VACIO = {
   servicios: "",
   imagenes: "",
   tipos_evento: [],
+  whatsapp: "", // <-- 1. Agregado al objeto vacío inicial
 };
 
 const aLista = (txt) => txt.split(",").map((x) => x.trim()).filter(Boolean);
@@ -41,6 +43,7 @@ export default function SalonForm() {
             servicios: (s.servicios ?? []).join(", "),
             imagenes: (s.imagenes ?? []).join(", "),
             tipos_evento: s.tipos_evento ?? [],
+            whatsapp: s.whatsapp ?? "", // <-- 2. Cargado al editar un salón existente
           })
         )
         .catch((e) => setError(e.message));
@@ -71,6 +74,12 @@ export default function SalonForm() {
   async function guardar(e) {
     e.preventDefault();
     setError("");
+
+    // <-- 3. Validación de WhatsApp requerida por la guía[cite: 8]
+    if (form.whatsapp && !normalizarWhatsapp(form.whatsapp)) {
+      return setError("El WhatsApp debe tener 10 dígitos (código de área + número).");
+    }
+
     setEnviando(true);
 
     const datos = {
@@ -82,6 +91,7 @@ export default function SalonForm() {
       servicios: aLista(form.servicios),
       imagenes: aLista(form.imagenes),
       tipos_evento: form.tipos_evento,
+      whatsapp: form.whatsapp ? form.whatsapp.trim() : null, // <-- 4. Incluido en los datos que viajan al backend[cite: 8]
     };
 
     try {
@@ -115,6 +125,19 @@ export default function SalonForm() {
           <label>
             Dirección
             <input name="direccion" value={form.direccion} onChange={cambiar} required />
+          </label>
+
+          {/* <-- 5. Campo de WhatsApp agregado en el JSX[cite: 8] */}
+          <label>
+            WhatsApp del salón
+            <input
+              type="tel"
+              name="whatsapp"
+              value={form.whatsapp ?? ""}
+              onChange={cambiar}
+              placeholder="3875123456"
+            />
+            <small>Código de área y número, sin 0 ni 15.</small>
           </label>
 
           <label>
@@ -165,4 +188,4 @@ export default function SalonForm() {
       </div>
     </div>
   );
-}
+}  
