@@ -30,6 +30,7 @@ class SalonModel(Base):
     descripcion = Column(String, nullable=True)
     servicios = Column(JSON, default=list)   # ["catering", "sonido"]
     imagenes = Column(JSON, default=list)    # ["https://..."]
+    anticipo_porcentaje = Column(Integer, nullable=True, default=20)  # % de anticipo por reserva
     tipos = relationship("TipoEvento", secondary=salon_tipo, backref="salones")
 
     @property
