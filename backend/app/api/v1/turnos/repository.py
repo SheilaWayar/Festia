@@ -1,18 +1,17 @@
 from datetime import datetime, time, timedelta
 
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.turno import TurnoModel
+from app.models.salon import SalonModel
 from app.api.v1.turnos.schemas import TurnoCreate
-
 from app.api.v1.turnos.reglas import calcular_montos, verificar_limite, verificar_disponibilidad
 from app.core.notificaciones import notificar_admins_de_salon
 
-from app.models.salon import SalonModel
-
 
 def a_respuesta(t: TurnoModel) -> dict:
-    """Convierte un TurnoModel al formato que usa el frontend."""
+    """Convierte un TurnoModel al formato que usa el frontend de forma segura."""
     return {
         "id": t.id,
         "salon_id": t.salon_id,
@@ -23,15 +22,15 @@ def a_respuesta(t: TurnoModel) -> dict:
         "hora_fin": t.fecha_fin.time(),
         "tipo_evento": t.tipo_evento,
         "estado": t.estado,
-        # Nuevos campos de montos y estados requeridos:
-        "monto_total": t.monto_total,
-        "anticipo_porcentaje": t.anticipo_porcentaje,
-        "monto_anticipo": t.monto_anticipo,
-        "monto_pagado": t.monto_pagado,
-        "estado_pago": t.estado_pago,
-        "estado_deposito": t.estado_deposito,
-        "comentario_deposito": t.comentario_deposito,
-        "motivo_rechazo": t.motivo_rechazo,
+        # Lectura segura con fallback a valores por defecto:
+        "monto_total": getattr(t, "monto_total", 0.0),
+        "anticipo_porcentaje": getattr(t, "anticipo_porcentaje", 20.0),
+        "monto_anticipo": getattr(t, "monto_anticipo", 0.0),
+        "monto_pagado": getattr(t, "monto_pagado", 0.0),
+        "estado_pago": getattr(t, "estado_pago", "pendiente"),
+        "estado_deposito": getattr(t, "estado_deposito", "pendiente"),
+        "comentario_deposito": getattr(t, "comentario_deposito", None),
+        "motivo_rechazo": getattr(t, "motivo_rechazo", None),
     }
 
 
@@ -73,7 +72,7 @@ def crear_turno(db: Session, data: TurnoCreate, cliente_id: int) -> TurnoModel:
         fecha_fin=fin,
         tipo_evento=data.tipo_evento,
         estado="pendiente",
-        **montos  # Inyecta monto_total, anticipo_porcentaje y monto_anticipo
+        **montos  # Inyecta monto_total, anticipo_porcentaje y monto_anticipo si coinciden con las columnas
     )
     db.add(turno)
     db.commit()
@@ -84,6 +83,7 @@ def crear_turno(db: Session, data: TurnoCreate, cliente_id: int) -> TurnoModel:
     db.commit()
 
     return turno
+
 
 def turnos_de_cliente(db: Session, cliente_id: int):
     return (
