@@ -31,9 +31,11 @@ class SalonModel(Base):
     servicios = Column(JSON, default=list)   # ["catering", "sonido"]
     imagenes = Column(JSON, default=list)    # ["https://..."]
     anticipo_porcentaje = Column(Integer, nullable=True, default=20)  # % de anticipo por reserva
+    whatsapp = Column(String, nullable=True)  # solo dígitos, ej: 5493875123456
     tipos = relationship("TipoEvento", secondary=salon_tipo, backref="salones")
 
     @property
     def tipos_evento(self) -> list[str]:
         """Lista de nombres, para que el schema la serialice directo."""
         return [t.nombre for t in self.tipos]
+    

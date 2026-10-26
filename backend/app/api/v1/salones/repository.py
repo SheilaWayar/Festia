@@ -4,6 +4,17 @@ from app.models.salon import SalonModel, TipoEvento
 from app.models.turno import TurnoModel
 from app.api.v1.salones.schemas import SalonCreate
 
+import re
+
+def limpiar_whatsapp(valor: str | None) -> str | None:
+    if not valor:
+        return None
+    digitos = re.sub(r"\D", "", valor)
+    if len(digitos) == 10:
+        digitos = "549" + digitos
+    if not (digitos.startswith("549") and len(digitos) in (12, 13)):
+        raise ValueError("El WhatsApp debe tener 10 dígitos (código de área + número).")
+    return digitos
 
 def obtener_salones(db: Session, capacidad_min: int = 0,
                     tipo_evento: str | None = None, q: str | None = None):
@@ -40,6 +51,12 @@ def tipos_por_nombre(db: Session, nombres: list[str]):
 
 def crear_salon(db: Session, data: SalonCreate):
     campos = data.model_dump(exclude={"tipos_evento"})
+    if "whatsapp" in campos:
+        try:
+            campos["whatsapp"] = limpiar_whatsapp(campos["whatsapp"])
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        
     salon = SalonModel(**campos, tipos=tipos_por_nombre(db, data.tipos_evento))
     db.add(salon)
     db.commit()
@@ -48,8 +65,16 @@ def crear_salon(db: Session, data: SalonCreate):
 
 
 def actualizar_salon(db: Session, salon: SalonModel, data: SalonCreate):
-    for campo, valor in data.model_dump(exclude={"tipos_evento"}).items():
+    datos = data.model_dump(exclude={"tipos_evento"})
+    if "whatsapp" in datos:
+        try:
+            datos["whatsapp"] = limpiar_whatsapp(datos["whatsapp"])
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        
+    for campo, valor in datos.items():
         setattr(salon, campo, valor)
+        
     salon.tipos = tipos_por_nombre(db, data.tipos_evento)
     db.commit()
     db.refresh(salon)
