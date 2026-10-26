@@ -1,7 +1,7 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
+﻿from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from app.db import Base  
+from app.core.db import Base  
 
 class UserModel(Base):
     __tablename__ = "usuarios"
@@ -14,7 +14,7 @@ class UserModel(Base):
     activo = Column(Boolean, default=True, nullable=False)
     fecha_creacion = Column(DateTime, default=datetime.utcnow)
 
-    # Relación con salones administrados
+    # RelaciÃ³n con salones administrados
     salones_administrados = relationship("SalonAdminModel", back_populates="usuario", cascade="all, delete-orphan")
 
 
@@ -25,5 +25,5 @@ class SalonAdminModel(Base):
     admin_id = Column(Integer, ForeignKey("usuarios.id", ondelete="CASCADE"), nullable=False)
     salon_id = Column(Integer, ForeignKey("salones.id", ondelete="CASCADE"), nullable=False)
 
-    # Relación hacia el usuario
+    # RelaciÃ³n hacia el usuario
     usuario = relationship("UserModel", back_populates="salones_administrados")
