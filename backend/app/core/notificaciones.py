@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models.notificacion import NotificacionModel
+from app.models.extra import NotificacionModel
 from app.models.salon_admin import SalonAdminModel
 
 def notificar(db: Session, usuario_id: int, tipo: str, mensaje: str, turno_id: int | None = None) -> None:
