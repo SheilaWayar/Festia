@@ -7,17 +7,15 @@ from app.core.db import Base
 salon_tipo = Table(
     "salon_tipo_evento",
     Base.metadata,
-    Column("salon_id", ForeignKey("salones.id"), primary_key=True),
-    Column("tipo_id", ForeignKey("tipos_evento.id"), primary_key=True),
+    Column("salon_id", Integer, ForeignKey("salones.id", ondelete="CASCADE"), primary_key=True),
+    Column("tipo_id", Integer, ForeignKey("tipos_evento.id", ondelete="CASCADE"), primary_key=True),
 )
-
 
 class TipoEvento(Base):
     __tablename__ = "tipos_evento"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String, unique=True, nullable=False)
-
 
 class SalonModel(Base):
     __tablename__ = "salones"
@@ -32,11 +30,9 @@ class SalonModel(Base):
     descripcion = Column(String, nullable=True)
     servicios = Column(JSON, default=list)   # ["catering", "sonido"]
     imagenes = Column(JSON, default=list)    # ["https://..."]
-    tipos = relationship("TipoEvento", secondary=salon_tipo)
+    tipos = relationship("TipoEvento", secondary=salon_tipo, backref="salones")
 
     @property
     def tipos_evento(self) -> list[str]:
         """Lista de nombres, para que el schema la serialice directo."""
         return [t.nombre for t in self.tipos]
-
-# El modelo de turnos NO va acá: vive en app/models/turno.py (TurnoModel).

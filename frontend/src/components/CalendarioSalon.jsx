@@ -11,7 +11,8 @@ const aDate = (iso) => new Date(`${iso}T00:00:00`);
 
 // Calendario del salón: deshabilita los días completos y resalta los que ya tienen alguna reserva.
 // Al cambiar de mes vuelve a pedir la disponibilidad. El backend igual valida al reservar.
-export default function CalendarioSalon({ salonId, fecha, onFecha, onOcupados }) {
+// inline = true: se muestra desplegado (para usarlo dentro de la tarjeta del salón).
+export default function CalendarioSalon({ salonId, fecha = null, onFecha, onOcupados, inline = false }) {
   const [mesVisible, setMesVisible] = useState(new Date());
   const { ocupados } = useDisponibilidad(salonId, aMes(mesVisible));
 
@@ -27,7 +28,7 @@ export default function CalendarioSalon({ salonId, fecha, onFecha, onOcupados })
   return (
     <DatePicker
       selected={fecha}
-      onChange={(d) => onFecha(d)}
+      onChange={(d) => onFecha?.(d)}
       onMonthChange={setMesVisible}
       minDate={new Date()}
       excludeDates={diasLlenos}
@@ -36,6 +37,7 @@ export default function CalendarioSalon({ salonId, fecha, onFecha, onOcupados })
       dateFormat="dd/MM/yyyy"
       placeholderText="Elegí una fecha"
       autoComplete="off"
+      inline={inline}
     />
   );
 }
