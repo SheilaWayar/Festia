@@ -55,7 +55,7 @@ def crear_salon(db: Session, data: SalonCreate):
         try:
             campos["whatsapp"] = limpiar_whatsapp(campos["whatsapp"])
         except ValueError as e:
-            raise HTTPException(status_code=400, detail=str(e))
+            raise HTTPException (status_code=400, detail=str(e))
         
     salon = SalonModel(**campos, tipos=tipos_por_nombre(db, data.tipos_evento))
     db.add(salon)
@@ -70,7 +70,7 @@ def actualizar_salon(db: Session, salon: SalonModel, data: SalonCreate):
         try:
             datos["whatsapp"] = limpiar_whatsapp(datos["whatsapp"])
         except ValueError as e:
-            raise HTTPException(status_code=400, detail=str(e))
+            raise HTTPException (status_code=400, detail=str(e))
         
     for campo, valor in datos.items():
         setattr(salon, campo, valor)
