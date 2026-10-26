@@ -5,6 +5,8 @@ import { salonesApi } from "../services/salonesApi";
 import { turnosApi } from "../services/turnosApi";
 import { HORAS, aISO, hhmm, hhmmFin, horaOcupada } from "../utils/disponibilidad";
 
+const pesos = (n) => `$${Number(n || 0).toLocaleString("es-AR")}`;
+
 export default function Reservar() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -49,6 +51,10 @@ export default function Reservar() {
   const cantidadHoras = inicio && fin ? Number(fin) - Number(inicio) : 0;
   const total = cantidadHoras * (salon.precio_por_hora ?? 0);
 
+  // Anticipo: lo define el administrador del salón (20% o 50%). El monto real lo calcula el backend.
+  const porcentaje = salon.anticipo_porcentaje ?? 20;
+  const anticipo = Math.round(total * porcentaje) / 100;
+
   async function enviar(e) {
     e.preventDefault();
     setError("");
@@ -63,7 +69,7 @@ export default function Reservar() {
       });
       navigate("/mis-turnos");
     } catch (err) {
-      setError(err.message); // ej: "Ese horario ya está ocupado"
+      setError(err.message); // ej: "Ese horario ya está ocupado" o "Ya tenés 3 reservas activas..."
     } finally {
       setEnviando(false);
     }
@@ -133,10 +139,19 @@ export default function Reservar() {
           </label>
 
           {cantidadHoras > 0 && (
-            <div className="reserva-resumen">
-              <span>Total estimado ({cantidadHoras} {cantidadHoras === 1 ? "hora" : "horas"})</span>
-              <strong>${total.toLocaleString("es-AR")}</strong>
-            </div>
+            <>
+              <div className="reserva-resumen">
+                <span>Total estimado ({cantidadHoras} {cantidadHoras === 1 ? "hora" : "horas"})</span>
+                <strong>{pesos(total)}</strong>
+              </div>
+              <div className="reserva-resumen">
+                <span>Anticipo para reservar ({porcentaje}%)</span>
+                <strong>{pesos(anticipo)}</strong>
+              </div>
+              <span className="ayuda">
+                El salón confirma tu pedido y después se paga el anticipo. Podés tener hasta 3 reservas activas a la vez.
+              </span>
+            </>
           )}
 
           <p className="form-msg" role="alert">{error}</p>

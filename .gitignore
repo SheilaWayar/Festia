@@ -1,2 +1,11 @@
+<<<<<<< HEAD
+
+__pycache__/
+*.pyc
+*.db
+=======
 node_modules/
 node_modules/
+>>>>>>> origin/develop
+
+backend.zip
