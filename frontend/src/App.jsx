@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import PanelAdmin from "./pages/admin/PanelAdmin";
 import SalonesAdmin from "./pages/admin/SalonesAdmin";
 import SalonForm from "./pages/admin/SalonForm";
+import HistorialSalon from "./pages/admin/HistorialSalon";
 import TurnosAdmin from "./pages/admin/TurnosAdmin";
 
 function LayoutPublico() {
@@ -50,8 +51,10 @@ export default function App() {
         <Route path="salones" element={<SalonesAdmin />} />
         <Route path="salones/nuevo" element={<SalonForm />} />
         <Route path="salones/:id" element={<SalonForm />} />
+        <Route path="salones/:id/historial" element={<HistorialSalon />} />
         <Route path="turnos" element={<TurnosAdmin />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
+        
       </Route>
     </Routes>
   );
