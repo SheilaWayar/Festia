@@ -8,7 +8,7 @@ from app.api.v1.auth.router import router as auth_router
 from app.api.v1.salones.router import router as salones_router, tipos_router
 from app.api.v1.resenas.router import router as resenas_router, resumen_router as resenas_resumen_router
 from app.api.v1.turnos.gestion import router as turnos_gestion_router
-from app.api.v1.pagos import router as pagos_router
+from app.api.v1.turnos.pagos import router as pagos_router
 
 
 from app.models.turno import TurnoModel  # noqa: F401
