@@ -7,6 +7,8 @@ from app.api.v1.turnos.router import router as turnos_router
 from app.api.v1.auth.router import router as auth_router
 from app.api.v1.salones.router import router as salones_router, tipos_router
 from app.api.v1.resenas.router import router as resenas_router, resumen_router as resenas_resumen_router
+from app.api.v1.turnos.gestion import router as turnos_gestion_router
+
 
 from app.models.turno import TurnoModel  # noqa: F401
 from app.models.salon import SalonModel  # noqa: F401
@@ -55,6 +57,8 @@ app.include_router(resenas_resumen_router, prefix="/api/v1/resenas", tags=["Rese
 app.include_router(turnos_router, prefix="/api/v1/turnos", tags=["Turnos"])
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(tipos_router, prefix="/api/v1/tipos-evento", tags=["Tipos de evento"])
+app.include_router(turnos_gestion_router, prefix="/api/v1/turnos", tags=["Turnos (gestión)"])
+
 
 @app.get("/")
 def inicio():
