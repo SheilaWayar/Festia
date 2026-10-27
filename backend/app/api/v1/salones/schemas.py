@@ -10,6 +10,7 @@ class SalonCreate(BaseModel):
     servicios: list[str] = []
     imagenes: list[str] = []
     tipos_evento: list[str] = []
+    whatsapp: str | None = None
 
 class SalonResponse(SalonCreate):
     model_config = ConfigDict(from_attributes=True)

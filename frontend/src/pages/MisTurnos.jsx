@@ -1,8 +1,20 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { turnosApi } from "../services/turnosApi";
+import BotonWhatsapp from "../components/BotonWhatsapp";
+import { useAuth } from "../context/AuthContext";
 
-const ESTADOS = { confirmado: "Confirmado", pendiente: "Pendiente", cancelado: "Cancelado" };
+const ESTADOS = {
+  pendiente: "Pendiente",
+  confirmado: "Confirmado",
+  finalizado: "Finalizado",
+  rechazado: "Rechazado",
+  cancelado: "Cancelado",
+};
+const ESTADOS_PAGO = { sin_pago: "Sin pago", parcial: "Anticipo pagado", pagado: "Pagado" };
+const DEPOSITO = { pendiente: "En custodia", liberado: "Liberado", retenido: "Retenido" };
+
+const pesos = (n) => `$${Number(n || 0).toLocaleString("es-AR")}`;
 
 const fechaLarga = (iso) =>
   new Date(`${iso}T00:00:00`).toLocaleDateString("es-AR", {
@@ -10,21 +22,31 @@ const fechaLarga = (iso) =>
   });
 
 export default function MisTurnos() {
+  const { sesion } = useAuth();
   const [turnos, setTurnos] = useState([]);
-  const [cargando, setCargando] = useState(true);
+  const [cargando, setCargando] = useState(true); // arranca en true: la primera carga ya está "cargando"
   const [error, setError] = useState(null);
   const [mensaje, setMensaje] = useState({ texto: "", ok: false });
   const [cancelando, setCancelando] = useState(null);
 
-  function cargar() {
-    setCargando(true);
-    setError(null);
-    turnosApi.mios().then(setTurnos).catch((e) => setError(e.message)).finally(() => setCargando(false));
+  // Pide los turnos. No cambia estados de forma inmediata, solo cuando responde el servidor.
+  function traer() {
+    return turnosApi
+      .mios()
+      .then(setTurnos)
+      .catch((e) => setError(e.message))
+      .finally(() => setCargando(false));
   }
 
   useEffect(() => {
-    cargar();
+    traer();
   }, []);
+
+  function reintentar() {
+    setCargando(true);
+    setError(null);
+    traer();
+  }
 
   async function cancelar(t) {
     if (!window.confirm(`¿Cancelar tu turno en ${t.salon_nombre}?`)) return;
@@ -56,7 +78,7 @@ export default function MisTurnos() {
         {error && (
           <div className="state-box">
             <p>{error}</p>
-            <button className="btn-outline" type="button" onClick={cargar}>Reintentar</button>
+            <button className="btn-outline" type="button" onClick={reintentar}>Reintentar</button>
           </div>
         )}
 
@@ -68,17 +90,37 @@ export default function MisTurnos() {
         )}
 
         {turnos.map((t) => {
-          const cancelado = t.estado === "cancelado";
+          const inactivo = ["cancelado", "rechazado"].includes(t.estado);
+          const puedeCancelar = ["pendiente", "confirmado"].includes(t.estado);
           return (
-            <article key={t.id} className={`turno-card${cancelado ? " is-cancelled" : ""}`}>
+            <article key={t.id} className={`turno-card${inactivo ? " is-cancelled" : ""}`}>
               <div>
                 <h3>{t.salon_nombre}</h3>
                 <p className="turno-meta">
                   {fechaLarga(t.fecha)} · {t.hora_inicio.slice(0, 5)} a {t.hora_fin.slice(0, 5)} h
                 </p>
+
+                {t.monto_total > 0 && (
+                  <p className="turno-meta">
+                    Total {pesos(t.monto_total)} · anticipo {t.anticipo_porcentaje}% ({pesos(t.monto_anticipo)}) ·{" "}
+                    {ESTADOS_PAGO[t.estado_pago] ?? t.estado_pago} · depósito{" "}
+                    {DEPOSITO[t.estado_deposito] ?? t.estado_deposito}
+                  </p>
+                )}
+
+                {t.motivo_rechazo && (
+                  <p className="turno-meta">Motivo del rechazo: {t.motivo_rechazo}</p>
+                )}
+                {t.comentario_deposito && (
+                  <p className="turno-meta">Comentario del salón sobre el depósito: {t.comentario_deposito}</p>
+                )}
+
+                {t.estado === "confirmado" && (
+                  <BotonWhatsapp turno={t} nombreUsuario={sesion?.nombre} />
+                )}
               </div>
               <span className={`badge badge-${t.estado}`}>{ESTADOS[t.estado] ?? t.estado}</span>
-              {!cancelado && (
+              {puedeCancelar && (
                 <button className="btn-danger" type="button"
                   disabled={cancelando === t.id} onClick={() => cancelar(t)}>
                   Cancelar

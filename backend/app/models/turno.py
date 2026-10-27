@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float
 from sqlalchemy.orm import relationship
 
 from app.core.db import Base
@@ -14,6 +14,9 @@ class TurnoModel(Base):
     fecha_fin = Column(DateTime, nullable=False)
     tipo_evento = Column(String, nullable=True)
     estado = Column(String, default="pendiente")  # pendiente | confirmado | cancelado
+    monto_total = Column(Float, nullable=True)
+    anticipo_porcentaje = Column(Integer, nullable=True)
+    monto_anticipo = Column(Float, nullable=True)
 
     salon = relationship("SalonModel")
     cliente = relationship("UserModel")
