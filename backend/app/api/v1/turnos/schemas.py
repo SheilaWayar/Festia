@@ -21,6 +21,8 @@ class TurnoResponse(BaseModel):
     id: int
     salon_id: int
     salon_nombre: str | None = None
+    salon_nombre: str | None = None
+    salon_whatsapp: str | None = None   # <-- agregar
     usuario_email: str | None = None
     fecha: date
     hora_inicio: time
