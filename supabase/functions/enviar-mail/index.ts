@@ -1,7 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
-const esc = (t: string) => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace/>/g, '&gt;')
-
+const esc = (t: string) =>
+  String(t || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
 Deno.serve(async (req) => {
   // Solo acepta llamadas del webhook de la base (lleva un secreto compartido)
@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
   const email = data?.user?.email
   if (!email) return new Response('usuario sin email')
 
-  const front = Deno.env.get('FRONTEND_URL') ?? ''
+  const front = Deno.env.get('FRONTEND_URL') || ''
   const boton = record.link
     ? '<p><a href="' + front + record.link + '" style="background:#4f46e5;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none">Ver en la plataforma</a></p>'
     : ''
@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
       Authorization: 'Bearer ' + Deno.env.get('RESEND_API_KEY'),
     },
     body: JSON.stringify({
-      from: Deno.env.get('MAIL_FROM') ?? 'Salones <onboarding@resend.dev>',
+      from: Deno.env.get('MAIL_FROM') || 'Salones <onboarding@resend.dev>',
       to: [email],
       subject: record.titulo,
       html,
