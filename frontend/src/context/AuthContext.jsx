@@ -27,7 +27,7 @@ export function AuthProvider({ children }) {
     setSesion(null);
   }
 
-  const esAdmin = sesion?.rol === "admin" || sesion?.rol === "superadmin";
+  const esAdmin = ["salon", "admin", "superadmin"].includes(sesion?.rol);
   const esSuperadmin = sesion?.rol === "superadmin";
 
   return (

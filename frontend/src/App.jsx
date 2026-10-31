@@ -14,6 +14,11 @@ import SalonesAdmin from "./pages/admin/SalonesAdmin";
 import SalonForm from "./pages/admin/SalonForm";
 import HistorialSalon from "./pages/admin/HistorialSalon";
 import TurnosAdmin from "./pages/admin/TurnosAdmin";
+import PanelEstadisticas from "./pages/admin/PanelEstadisticas";
+import HistorialReservas from "./pages/admin/HistorialReservas";
+import ClientesAdmin from "./pages/admin/ClientesAdmin";
+import MiSalon from "./pages/admin/MiSalon";
+import SolicitudesAdmin from "./pages/admin/SolicitudesAdmin";
 
 function LayoutPublico() {
   return (
@@ -46,14 +51,20 @@ export default function App() {
         <Route path="*" element={<p className="empty-state">Página no encontrada</p>} />
       </Route>
 
-      <Route path="/admin" element={<RutaAdmin><AdminLayout /></RutaAdmin>}>
-        <Route index element={<PanelAdmin />} />
-        <Route path="salones" element={<SalonesAdmin />} />
-        <Route path="salones/nuevo" element={<SalonForm />} />
-        <Route path="salones/:id" element={<SalonForm />} />
-        <Route path="salones/:id/historial" element={<HistorialSalon />} />
-        <Route path="turnos" element={<TurnosAdmin />} />
-        <Route path="*" element={<Navigate to="/admin" replace />} />
+     <Route path="/admin" element={<RutaAdmin><AdminLayout /></RutaAdmin>}>
+  <Route index element={<PanelAdmin />} />
+  <Route path="salones" element={<SalonesAdmin />} />
+  <Route path="salones/nuevo" element={<SalonForm />} />
+  <Route path="salones/:id" element={<SalonForm />} />
+  <Route path="salones/:id/historial" element={<HistorialSalon />} />
+  <Route path="turnos" element={<TurnosAdmin />} />
+  <Route path="estadisticas" element={<PanelEstadisticas />} />
+  <Route path="historial-reservas" element={<HistorialReservas />} />
+  <Route path="clientes" element={<ClientesAdmin />} />
+  <Route path="mi-salon" element={<MiSalon />} />
+  <Route path="solicitudes" element={<SolicitudesAdmin />} />
+  <Route path="*" element={<Navigate to="/admin" replace />} />
+
         
       </Route>
     </Routes>

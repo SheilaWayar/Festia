@@ -58,6 +58,12 @@ export default function AdminLayout() {
             <NavLink to="/admin" end onClick={cerrarMenu}>Panel</NavLink>
             <NavLink to="/admin/salones" onClick={cerrarMenu}>Salones</NavLink>
             <NavLink to="/admin/turnos" onClick={cerrarMenu}>Turnos</NavLink>
+            <NavLink to="/admin/turnos" onClick={cerrarMenu}>Turnos</NavLink>
+            <NavLink to="/admin/estadisticas" onClick={cerrarMenu}>Estadísticas</NavLink>
+            <NavLink to="/admin/historial-reservas" onClick={cerrarMenu}>Historial por salón</NavLink>
+            <NavLink to="/admin/clientes" onClick={cerrarMenu}>Historial por cliente</NavLink>
+            <NavLink to="/admin/mi-salon" onClick={cerrarMenu}>Mi salón</NavLink>
+            <NavLink to="/admin/solicitudes" onClick={cerrarMenu}>Solicitudes</NavLink>
           </nav>
 
           <div className="admin-sidebar-extra">

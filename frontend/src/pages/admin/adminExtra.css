@@ -1,0 +1,44 @@
+.rb{color:#111827;font-size:14px}
+.rb *{box-sizing:border-box}
+.rb h2{font-size:16px;font-weight:600;margin:0 0 8px}
+.rb-stack{display:flex;flex-direction:column;gap:16px}
+.rb-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.rb-between{justify-content:space-between}
+.rb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.rb-fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.rb-card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px}
+.rb-label{font-size:12px;color:#6b7280;margin:0}
+.rb-num{font-size:22px;font-weight:600;margin:2px 0 0}
+.rb-wrap{overflow-x:auto;background:#fff;border:1px solid #e5e7eb;border-radius:12px}
+.rb-table{width:100%;border-collapse:collapse;min-width:640px;text-align:left}
+.rb-table th{background:#f9fafb;color:#6b7280;font-size:12px;text-transform:uppercase;padding:10px 12px}
+.rb-table td{padding:10px 12px;border-top:1px solid #e5e7eb;vertical-align:top}
+.rb-input{border:1px solid #d1d5db;border-radius:8px;padding:8px 10px;background:#fff;color:#111827;font:inherit}
+.rb-full{width:100%}
+.rb-grow{flex:1;min-width:0}
+.rb-btn{border:0;border-radius:8px;padding:8px 14px;background:#4f46e5;color:#fff;cursor:pointer;font:inherit}
+.rb-btn.green{background:#16a34a}
+.rb-btn.red{background:#dc2626}
+.rb-link{background:none;border:0;padding:0;color:#4f46e5;cursor:pointer;font:inherit}
+.rb-link.red{color:#dc2626}
+.rb-muted{color:#6b7280}
+.rb-small{font-size:12px}
+.rb-green{color:#16a34a}
+.rb-red{color:#dc2626}
+.rb-yellow{color:#ca8a04}
+.rb-badge{border-radius:6px;padding:2px 8px;font-size:12px}
+.rb-badge.pendiente{background:#fef9c3;color:#a16207}
+.rb-badge.aprobada{background:#dcfce7;color:#15803d}
+.rb-badge.rechazada{background:#fee2e2;color:#b91c1c}
+.rb-bars{display:flex;align-items:flex-end;gap:8px;height:170px;overflow-x:auto}
+.rb-bar{flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px}
+.rb-bar div{width:100%;background:#6366f1;border-radius:4px 4px 0 0}
+.rb-bar span{font-size:10px;color:#6b7280}
+.rb-photo{width:100%;height:96px;object-fit:cover;border-radius:8px}
+.rb-photo.main{outline:2px solid #4f46e5}
+.rb-msg{color:#4f46e5}
+.rb-err{color:#dc2626}
+.rb-field{display:block;margin-bottom:8px}
+.rb-field span{display:block;color:#6b7280;font-size:12px}
+.rb-click{width:100%;background:none;border:0;text-align:left;padding:12px;cursor:pointer;color:inherit;font:inherit}
+.rb-page{max-width:680px;margin:0 auto}
