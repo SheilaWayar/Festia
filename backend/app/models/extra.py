@@ -36,7 +36,9 @@ class NotificacionModel(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     usuario_id = Column(Integer, ForeignKey("usuarios.id", ondelete="CASCADE"), nullable=False)
-    titulo = Column(String, nullable=False)
+    titulo = Column(String, nullable=True)  # Se cambió a nullable=True por si no viene título
     mensaje = Column(Text, nullable=False)
     leida = Column(Boolean, default=False, nullable=False)
     fecha_creacion = Column(DateTime, default=datetime.utcnow)
+    tipo_notificacion = Column(String, nullable=False)
+    turno_id = Column(Integer, ForeignKey("turnos.id", ondelete="SET NULL"), nullable=True)
