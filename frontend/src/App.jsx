@@ -8,6 +8,7 @@ import Salones from "./pages/Salones";
 import SalonDetalle from "./pages/SalonDetalle";
 import Reservar from "./pages/Reservar";
 import MisTurnos from "./pages/MisTurnos";
+import MiPerfil from "./pages/MiPerfil";
 import Login from "./pages/Login";
 import QuieroSerSalon from "./pages/QuieroSerSalon";
 import PanelAdmin from "./pages/admin/PanelAdmin";
@@ -50,6 +51,10 @@ export default function App() {
         <Route
           path="/mis-turnos"
           element={<RutaProtegida><MisTurnos /></RutaProtegida>}
+        />
+        <Route
+          path="/mi-perfil"
+          element={<RutaProtegida><MiPerfil /></RutaProtegida>}
         />
         <Route path="/quiero-ser-salon" element={<QuieroSerSalon />} />
         <Route path="/login" element={<Login />} />

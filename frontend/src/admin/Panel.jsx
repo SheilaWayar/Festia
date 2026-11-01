@@ -9,7 +9,8 @@ const nombreMes = (m) => {
 const METODOS = [
   ['efectivo', 'Efectivo'],
   ['transferencia', 'Transferencia'],
-  ['mercadopago', 'Mercado Pago'],
+  ['tarjeta_credito', 'Tarjeta de crédito'],
+  ['otros', 'Otros (débito, dinero en cuenta)'],
 ]
 
 // Resumen: reservas, cobrado, pagos por método, salón más solicitado e ingresos por mes
@@ -84,7 +85,7 @@ export default function Panel() {
 
       <section className='rounded-lg border border-gray-200 bg-white p-4'>
         <h2 className='mb-3 font-medium'>Cuánto se pagó, por método</h2>
-        <div className='grid grid-cols-1 gap-3 sm:grid-cols-3'>
+        <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4'>
           {porMetodo.map((m) => (
             <div key={m.k} className='rounded-lg bg-gray-50 p-3'>
               <p className='text-xs text-gray-500'>{m.nombre}</p>

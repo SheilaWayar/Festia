@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { turnosApi } from "../services/turnosApi";
 import BotonWhatsapp from "../components/BotonWhatsapp";
+import BotonPagar from "../components/BotonPagar";
 import { useAuth } from "../context/AuthContext";
 
 const ESTADOS = {
@@ -14,6 +15,13 @@ const ESTADOS = {
 const ESTADOS_PAGO = { sin_pago: "Sin pago", parcial: "Anticipo pagado", pagado: "Pagado" };
 const DEPOSITO = { pendiente: "En custodia", liberado: "Liberado", retenido: "Retenido" };
 
+// Qué se muestra cuando Mercado Pago devuelve al cliente a esta pantalla (?pago=...)
+const AVISOS_PAGO = {
+  ok: { texto: "¡Pago recibido! Mercado Pago nos avisa en unos segundos y tu turno se actualiza solo.", ok: true },
+  pendiente: { texto: "Tu pago está pendiente de acreditación. Cuando se acredite lo vas a ver acá.", ok: true },
+  error: { texto: "El pago no se completó. Podés intentarlo de nuevo cuando quieras.", ok: false },
+};
+
 const pesos = (n) => `$${Number(n || 0).toLocaleString("es-AR")}`;
 
 const fechaLarga = (iso) =>
@@ -23,6 +31,8 @@ const fechaLarga = (iso) =>
 
 export default function MisTurnos() {
   const { sesion } = useAuth();
+  const [params] = useSearchParams();
+  const pago = params.get("pago");
   const [turnos, setTurnos] = useState([]);
   const [cargando, setCargando] = useState(true); // arranca en true: la primera carga ya está "cargando"
   const [error, setError] = useState(null);
@@ -41,6 +51,13 @@ export default function MisTurnos() {
   useEffect(() => {
     traer();
   }, []);
+
+  // Al volver de Mercado Pago el aviso del pago puede tardar unos segundos: se vuelve a consultar
+  useEffect(() => {
+    if (pago !== "ok" && pago !== "pendiente") return;
+    const tiempos = [3000, 8000, 15000].map((ms) => setTimeout(traer, ms));
+    return () => tiempos.forEach(clearTimeout);
+  }, [pago]);
 
   function reintentar() {
     setCargando(true);
@@ -63,6 +80,8 @@ export default function MisTurnos() {
     }
   }
 
+  const aviso = mensaje.texto ? mensaje : AVISOS_PAGO[pago] ?? mensaje;
+
   return (
     <>
       <header className="page-head">
@@ -70,7 +89,7 @@ export default function MisTurnos() {
         <h2>Mis <em>turnos</em></h2>
       </header>
 
-      <p className={`form-msg turnos-msg${mensaje.ok ? " is-ok" : ""}`} role="alert">{mensaje.texto}</p>
+      <p className={`form-msg turnos-msg${aviso.ok ? " is-ok" : ""}`} role="alert">{aviso.texto}</p>
 
       <section className="turnos-list" aria-live="polite">
         {cargando && <div className="state-box"><p>Cargando tus turnos...</p></div>}
@@ -102,22 +121,24 @@ export default function MisTurnos() {
 
                 {t.monto_total > 0 && (
                   <p className="turno-meta">
-                    Total {pesos(t.monto_total)} · anticipo {t.anticipo_porcentaje}% ({pesos(t.monto_anticipo)}) ·{" "}
+                    Total {pesos(t.monto_total)} · pagado {pesos(t.monto_pagado)} ·{" "}
                     {ESTADOS_PAGO[t.estado_pago] ?? t.estado_pago} · depósito{" "}
-                    {DEPOSITO[t.estado_deposito] ?? t.estado_deposito}
+                    {DEPOSITO[t.deposito ?? "pendiente"] ?? t.deposito}
                   </p>
                 )}
 
                 {t.motivo_rechazo && (
                   <p className="turno-meta">Motivo del rechazo: {t.motivo_rechazo}</p>
                 )}
-                {t.comentario_deposito && (
-                  <p className="turno-meta">Comentario del salón sobre el depósito: {t.comentario_deposito}</p>
+                {t.comentario && (
+                  <p className="turno-meta">Comentario del salón sobre el depósito: {t.comentario}</p>
                 )}
 
                 {t.estado === "confirmado" && (
                   <BotonWhatsapp turno={t} nombreUsuario={sesion?.nombre} />
                 )}
+
+                <BotonPagar turno={t} />
               </div>
               <span className={`badge badge-${t.estado}`}>{ESTADOS[t.estado] ?? t.estado}</span>
               {puedeCancelar && (

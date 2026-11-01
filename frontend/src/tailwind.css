@@ -10,7 +10,6 @@
 .admin-light textarea { color-scheme: dark; }
 .admin-light ::placeholder { color: var(--muted); }
 
-/* Títulos: toman el color del texto y no el tamaño gigante del sitio */
 .admin-light h1, .admin-light h2, .admin-light h3, .admin-light h4 {
   font-family: inherit;
   color: inherit;
@@ -22,21 +21,21 @@
 .admin-light h2 { font-size: 1rem; font-weight: 500; }
 .admin-light h3 { font-size: 1.125rem; font-weight: 500; }
 
-/* Fondos */
+/* Fondos (incluye el propio contenedor, que lleva la clase admin-light) */
 .admin-light.bg-gray-50, .admin-light .bg-gray-50 { background-color: var(--surface); }
-.admin-light .bg-white { background-color: var(--surface-raised); }
+.admin-light.bg-white, .admin-light .bg-white { background-color: var(--surface-raised); }
 .admin-light .bg-gray-100 { background-color: rgba(255, 255, 255, .08); }
-.admin-light .hover\:bg-gray-50:hover { background-color: rgba(255, 255, 255, .05); }
+.admin-light .hover\:bg-gray-50:hover { background-color: rgba(255, 255, 255, .06); }
 
 /* Textos */
 .admin-light.text-gray-900, .admin-light .text-gray-900, .admin-light .text-gray-700 { color: var(--ink); }
 .admin-light .text-gray-400, .admin-light .text-gray-500, .admin-light .text-gray-600 { color: var(--muted); }
 
 /* Bordes */
-.admin-light .border,
+.admin-light.border, .admin-light .border,
 .admin-light .border-t,
 .admin-light .border-b,
-.admin-light .border-gray-200,
+.admin-light.border-gray-200, .admin-light .border-gray-200,
 .admin-light .border-gray-300 { border-color: var(--line); }
 
 /* Acento: verde con borde dorado, como los botones del sitio */
