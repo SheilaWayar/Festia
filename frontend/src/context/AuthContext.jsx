@@ -1,6 +1,10 @@
+import { supabase } from "../services/api";
 import { createContext, useContext, useState } from "react";
 
 const AuthContext = createContext(null);
+
+// Roles que pueden entrar al panel: salón, admin y superadmin
+const ROLES_PANEL = ["salon", "admin", "superadmin"];
 
 export function AuthProvider({ children }) {
   const [sesion, setSesion] = useState(() => {
@@ -14,7 +18,7 @@ export function AuthProvider({ children }) {
       : null;
   });
 
-  // datos = respuesta del backend: { access_token, rol, nombre }
+  // datos = respuesta del login: { access_token, rol, nombre }
   function iniciarSesion(datos) {
     localStorage.setItem("token", datos.access_token);
     localStorage.setItem("rol", datos.rol);
@@ -23,11 +27,13 @@ export function AuthProvider({ children }) {
   }
 
   function cerrarSesion() {
+    // cierra también la sesión de Supabase, si no queda abierta
+    supabase.auth.signOut();
     ["token", "rol", "nombre"].forEach((k) => localStorage.removeItem(k));
     setSesion(null);
   }
 
-  const esAdmin = sesion?.rol === "admin" || sesion?.rol === "superadmin";
+  const esAdmin = ROLES_PANEL.includes(sesion?.rol);
   const esSuperadmin = sesion?.rol === "superadmin";
 
   return (

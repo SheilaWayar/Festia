@@ -16,6 +16,8 @@ def a_respuesta(t: TurnoModel) -> dict:
         "id": t.id,
         "salon_id": t.salon_id,
         "salon_nombre": t.salon.nombre if t.salon else None,
+        "salon_nombre": t.salon.nombre if t.salon else None,
+        "salon_whatsapp": t.salon.whatsapp if t.salon else None,   # <-- agregar
         "usuario_email": t.cliente.email if t.cliente else None,
         "fecha": t.fecha_inicio.date(),
         "hora_inicio": t.fecha_inicio.time(),

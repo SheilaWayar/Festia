@@ -1,20 +1,35 @@
-import { useState } from "react";
-import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
-import Icono from "./Icono";
-import { useAuth } from "../context/AuthContext";
+import { useState } from 'react'
+import { NavLink, Outlet, Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 export default function AdminLayout() {
-  const { sesion, cerrarSesion } = useAuth();
-  const [menuAbierto, setMenuAbierto] = useState(false);
-  const navigate = useNavigate();
-
-  const cerrarMenu = () => setMenuAbierto(false);
+  const [abierto, setAbierto] = useState(false)
+  const { sesion, esSuperadmin, cerrarSesion } = useAuth()
+  const navigate = useNavigate()
 
   function salir() {
-    cerrarSesion();
-    cerrarMenu();
-    navigate("/salones");
+    cerrarSesion()
+    navigate('/salones')
   }
+
+  const cerrar = () => setAbierto(false)
+
+  const grupos = [
+    {
+      titulo: 'Gestión',
+      items: [
+        ['/admin', 'Resumen'],
+        ['/admin/turnos', 'Turnos'],
+        ['/admin/historial', 'Historial'],
+        ['/admin/clientes', 'Clientes'],
+        ['/admin/mi-salon', 'Mi salón'],
+        ...(sesion?.rol !== 'salon' ? [['/admin/salones', 'Salones']] : []),
+      ],
+    },
+    ...(esSuperadmin
+      ? [{ titulo: 'Sistema', items: [['/admin/solicitudes', 'Solicitudes']] }]
+      : []),
+  ]
 
   return (
     <div className="admin-shell">
@@ -23,56 +38,52 @@ export default function AdminLayout() {
           <button
             className="admin-menu-button"
             type="button"
-            aria-label="Abrir menú de administración"
-            aria-expanded={menuAbierto}
-            onClick={() => setMenuAbierto(!menuAbierto)}
+            aria-label="Menú"
+            onClick={() => setAbierto(!abierto)}
           >
-            <Icono nombre="menu" />
+            ☰
           </button>
-          <Link className="brand" to="/admin" aria-label="Festia, panel de administración" onClick={cerrarMenu}>
-            <span className="brand-mark"><Icono nombre="sparkle" size={17} /></span>
-            <span>Festia</span>
-          </Link>
+          <strong>Festia · Admin</strong>
         </div>
 
-        <nav className="admin-header-nav" aria-label="Navegación principal">
-          <NavLink to="/admin" end>Admin</NavLink>
-          <Link to="/salones">Salones</Link>
-          <Link to="/salones#contacto">Contacto</Link>
+        <nav className="admin-header-nav">
+          <Link to="/salones">Ver sitio</Link>
         </nav>
 
         <div className="admin-header-user">
           <span className="admin-user-name">{sesion?.nombre}</span>
-          <button className="admin-logout" type="button" onClick={salir}>
-            Salir
-          </button>
+          <button className="admin-logout" type="button" onClick={salir}>Salir</button>
         </div>
       </header>
 
       <div className="admin-body">
-        {menuAbierto && <div className="admin-overlay" onClick={cerrarMenu} />}
-
-        <aside className={`admin-sidebar${menuAbierto ? " open" : ""}`}>
-          <p className="admin-sidebar-title">Administración</p>
-          <nav className="admin-sidebar-nav" aria-label="Menú de administración">
-            <NavLink to="/admin" end onClick={cerrarMenu}>Panel</NavLink>
-            <NavLink to="/admin/salones" onClick={cerrarMenu}>Salones</NavLink>
-            <NavLink to="/admin/turnos" onClick={cerrarMenu}>Turnos</NavLink>
-          </nav>
+        <aside className={'admin-sidebar' + (abierto ? ' open' : '')}>
+          {grupos.map((g) => (
+            <div key={g.titulo} style={{ marginBottom: 20 }}>
+              <p className="admin-sidebar-title">{g.titulo}</p>
+              <nav className="admin-sidebar-nav">
+                {g.items.map(([to, label]) => (
+                  <NavLink key={to} to={to} end={to === '/admin'} onClick={cerrar}>
+                    {label}
+                  </NavLink>
+                ))}
+              </nav>
+            </div>
+          ))}
 
           <div className="admin-sidebar-extra">
-            <p className="admin-sidebar-title">Sitio</p>
-            <nav className="admin-sidebar-nav" aria-label="Sitio público">
-              <Link to="/salones" onClick={cerrarMenu}>Ver salones</Link>
-              <Link to="/salones#contacto" onClick={cerrarMenu}>Contacto</Link>
+            <nav className="admin-sidebar-nav">
+              <Link to="/salones" onClick={cerrar}>Ver sitio</Link>
             </nav>
           </div>
         </aside>
 
-        <div className="admin-main">
+        <main className="admin-main">
           <Outlet />
-        </div>
+        </main>
       </div>
+
+      {abierto && <div className="admin-overlay" onClick={cerrar} />}
     </div>
-  );
+  )
 }

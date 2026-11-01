@@ -32,10 +32,10 @@ def _resumen(t: TurnoModel) -> dict:
     return {
         "id": t.id,
         "estado": t.estado,
-        "estado_pago": t.estado_pago,
-        "estado_deposito": t.estado_deposito,
-        "comentario_deposito": t.comentario_deposito,
-        "motivo_rechazo": t.motivo_rechazo,
+        "estado_pago": getattr(t, "estado_pago", "pendiente"),
+        "estado_deposito": getattr(t, "estado_deposito", "pendiente"),
+        "comentario_deposito": getattr(t, "comentario_deposito", None),
+        "motivo_rechazo": getattr(t, "motivo_rechazo", None),
     }
 
 @router.patch("/{turno_id}/confirmar")
