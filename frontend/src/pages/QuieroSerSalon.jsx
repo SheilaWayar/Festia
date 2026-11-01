@@ -22,7 +22,7 @@ export default function QuieroSerSalon() {
   useEffect(() => { if (user) cargar(user.id) }, [user])
 
   if (cargando) return null
-  if (!user) return <p className='p-6'>Iniciá sesión para publicar tu salón. <Link className='text-indigo-600' to='/login'>Entrar</Link></p>
+  if (!user) return <p className='p-6'>Iniciá sesión para publicar tu salón. <Link className='text-indigo-400' to='/login'>Entrar</Link></p>
   if (['admin', 'superadmin'].includes(perfil?.rol)) return <p className='p-6'>Tu cuenta ya administra la plataforma.</p>
 
   const hayPendiente = mias.some((s) => s.estado === 'pendiente')
@@ -47,11 +47,11 @@ export default function QuieroSerSalon() {
 
   const campo = (k, ph, type = 'text') => (
     <input type={type} placeholder={ph} value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })}
-      className='w-full rounded border px-3 py-2' />
+      className='w-full rounded border border-gray-300 bg-white px-3 py-2 text-gray-900' />
   )
 
   return (
-    <main className='mx-auto max-w-xl space-y-4 p-4'>
+    <main className='admin-light mx-auto my-10 max-w-xl space-y-4 rounded-xl bg-gray-50 p-6 text-gray-900'>
       <h1 className='text-xl font-semibold'>Publicá tu salón</h1>
       <p className='text-sm text-gray-500'>
         Completá los datos y el equipo revisa tu solicitud. Si se aprueba, seguís entrando con tu mismo usuario y
@@ -64,11 +64,12 @@ export default function QuieroSerSalon() {
         <div className='space-y-2'>
           {campo('nombre', 'Nombre del salón')}
           <textarea placeholder='Descripción' value={f.descripcion}
-            onChange={(e) => setF({ ...f, descripcion: e.target.value })} className='h-24 w-full rounded border px-3 py-2' />
+            onChange={(e) => setF({ ...f, descripcion: e.target.value })}
+            className='h-24 w-full rounded border border-gray-300 bg-white px-3 py-2 text-gray-900' />
           {campo('direccion', 'Dirección')}
           <div className='grid grid-cols-2 gap-2'>
             {campo('capacidad', 'Capacidad', 'number')}
-            {campo('precio', 'Precio por fecha ($)', 'number')}
+            {campo('precio', 'Precio por hora ($)', 'number')}
           </div>
           {campo('telefono', 'Teléfono de contacto')}
           {msg && <p className='text-sm text-indigo-600'>{msg}</p>}
@@ -80,7 +81,7 @@ export default function QuieroSerSalon() {
         <section className='space-y-2'>
           <h2 className='font-medium'>Mis solicitudes</h2>
           {mias.map((s) => (
-            <div key={s.id} className='flex items-center justify-between rounded-lg border bg-white p-3 text-sm'>
+            <div key={s.id} className='flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3 text-sm'>
               <span>{s.nombre}</span>
               <span className={'rounded px-2 py-0.5 text-xs ' + color[s.estado]}>{s.estado}</span>
             </div>

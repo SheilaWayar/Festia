@@ -55,15 +55,15 @@ export default function Campana({ userId }) {
       </button>
 
       {abierta && (
-        <div className='absolute right-0 mt-2 w-80 max-w-[90vw] overflow-hidden rounded-xl border bg-white shadow-lg'>
-          <div className='flex items-center justify-between border-b px-3 py-2 text-sm'>
+        <div className='admin-light absolute right-0 z-50 mt-2 w-80 max-w-[90vw] overflow-hidden rounded-xl border border-gray-200 bg-white text-gray-900 shadow-lg'>
+          <div className='flex items-center justify-between border-b border-gray-200 px-3 py-2 text-sm'>
             <b>Notificaciones</b>
             {sinLeer > 0 && <button onClick={marcarTodas} className='text-xs text-indigo-600'>Marcar todas como leídas</button>}
           </div>
           <div className='max-h-80 overflow-y-auto'>
             {lista.map((n) => (
               <button key={n.id} onClick={() => abrir(n)}
-                className={'block w-full border-b px-3 py-2 text-left text-sm hover:bg-gray-50 ' + (n.leida ? '' : 'bg-indigo-50')}>
+                className={'block w-full border-b border-gray-200 px-3 py-2 text-left text-sm hover:bg-gray-50 ' + (n.leida ? '' : 'bg-indigo-50')}>
                 <p className='font-medium'>{n.titulo}</p>
                 <p className='text-gray-600'>{n.mensaje}</p>
                 <p className='text-xs text-gray-400'>{fecha(n.created_at)}</p>
