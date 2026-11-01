@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import Icono from "./Icono";
+import Campana from "./Campana";
 import { useAuth } from "../context/AuthContext";
+import { usePerfil } from "../lib/usePerfil";
 
 export default function Navbar() {
   const { sesion, esAdmin, cerrarSesion } = useAuth();
+  const { user, perfil } = usePerfil();
   const [abierto, setAbierto] = useState(false);
   const navigate = useNavigate();
 
@@ -36,8 +39,13 @@ export default function Navbar() {
       <nav className={`nav${abierto ? " open" : ""}`}>
         <NavLink to="/salones" onClick={cerrarMenu}>Salones</NavLink>
         {sesion && <NavLink to="/mis-turnos" onClick={cerrarMenu}>Mis turnos</NavLink>}
+        {perfil?.rol === "usuario" && (
+          <NavLink to="/quiero-ser-salon" onClick={cerrarMenu}>Publicar mi salón</NavLink>
+        )}
         {esAdmin && <NavLink to="/admin" onClick={cerrarMenu}>Admin</NavLink>}
         <Link to="/salones#contacto" onClick={cerrarMenu}>Contacto</Link>
+
+        {user && <Campana userId={user.id} />}
 
         {sesion ? (
           <button className="nav-cta" type="button" onClick={salir}>

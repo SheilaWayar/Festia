@@ -1,79 +1,90 @@
-import { useEffect, useState } from 'react'
-import { NavLink, Outlet, Link } from 'react-router-dom'
-import { supabase } from '../lib/supabase'
+import { useState } from 'react'
+import { NavLink, Outlet, Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 export default function AdminLayout() {
   const [abierto, setAbierto] = useState(false)
-  const [rol, setRol] = useState(null)
+  const { sesion, esSuperadmin, cerrarSesion } = useAuth()
+  const navigate = useNavigate()
 
-  useEffect(() => {
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) return
-      const { data } = await supabase.from('perfiles').select('rol').eq('id', user.id).single()
-      setRol(data?.rol)
-    })
-  }, [])
+  function salir() {
+    cerrarSesion()
+    navigate('/salones')
+  }
 
-  // Si tus rutas de admin se llaman distinto, cambialas acá
+  const cerrar = () => setAbierto(false)
+
   const grupos = [
     {
       titulo: 'Gestión',
       items: [
         ['/admin', 'Resumen'],
+        ['/admin/panel', 'Panel'],
         ['/admin/turnos', 'Turnos'],
+        ['/admin/historial', 'Historial'],
+        ['/admin/clientes', 'Clientes'],
+        ['/admin/mi-salon', 'Mi salón'],
+        ['/admin/salones', 'Salones'],
       ],
     },
-    ...(rol === 'superadmin'
-      ? [{ titulo: 'Sistema', items: [['/admin/administradores', 'Administradores']] }]
+    ...(esSuperadmin
+      ? [{ titulo: 'Sistema', items: [['/admin/solicitudes', 'Solicitudes']] }]
       : []),
   ]
 
   return (
-    <div className='min-h-dvh bg-gray-50'>
-      <header className='sticky top-0 z-40 flex h-14 items-center justify-between border-b bg-white px-4 shadow-sm'>
-        <div className='flex items-center gap-3'>
-          <button className='md:hidden' onClick={() => setAbierto(!abierto)} aria-label='Menú'>☰</button>
-          <span className='font-semibold text-indigo-600'>Salones · Admin</span>
+    <div className="admin-shell">
+      <header className="admin-header">
+        <div className="admin-header-left">
+          <button
+            className="admin-menu-button"
+            type="button"
+            aria-label="Menú"
+            onClick={() => setAbierto(!abierto)}
+          >
+            ☰
+          </button>
+          <strong>Festia · Admin</strong>
         </div>
-        <div className='flex gap-4 text-sm text-gray-600'>
-          <Link to='/'>Ver sitio</Link>
-          <Link to='/contacto'>Contacto</Link>
-          <button onClick={() => supabase.auth.signOut()}>Salir</button>
+
+        <nav className="admin-header-nav">
+          <Link to="/salones">Ver sitio</Link>
+        </nav>
+
+        <div className="admin-header-user">
+          <span className="admin-user-name">{sesion?.nombre}</span>
+          <button className="admin-logout" type="button" onClick={salir}>Salir</button>
         </div>
       </header>
 
-      <div className='flex'>
-        <aside
-          className={
-            (abierto ? 'block' : 'hidden') +
-            ' fixed inset-x-0 top-14 z-30 bg-white p-3 shadow md:sticky md:top-14 md:block md:h-[calc(100dvh-3.5rem)] md:w-56 md:shrink-0 md:overflow-y-auto md:border-r md:shadow-none'
-          }
-        >
-          {grupos.map(g => (
-            <div key={g.titulo} className='mb-4'>
-              <p className='mb-1 px-2 text-xs font-semibold uppercase text-gray-400'>{g.titulo}</p>
-              {g.items.map(([to, label]) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  end={to === '/admin'}
-                  onClick={() => setAbierto(false)}
-                  className={({ isActive }) =>
-                    'block rounded-lg px-3 py-2 text-sm ' +
-                    (isActive ? 'bg-indigo-50 font-medium text-indigo-700' : 'text-gray-600 hover:bg-gray-100')
-                  }
-                >
-                  {label}
-                </NavLink>
-              ))}
+      <div className="admin-body">
+        <aside className={'admin-sidebar' + (abierto ? ' open' : '')}>
+          {grupos.map((g) => (
+            <div key={g.titulo} style={{ marginBottom: 20 }}>
+              <p className="admin-sidebar-title">{g.titulo}</p>
+              <nav className="admin-sidebar-nav">
+                {g.items.map(([to, label]) => (
+                  <NavLink key={to} to={to} end={to === '/admin'} onClick={cerrar}>
+                    {label}
+                  </NavLink>
+                ))}
+              </nav>
             </div>
           ))}
+
+          <div className="admin-sidebar-extra">
+            <nav className="admin-sidebar-nav">
+              <Link to="/salones" onClick={cerrar}>Ver sitio</Link>
+            </nav>
+          </div>
         </aside>
 
-        <main className='min-w-0 flex-1 p-4'>
+        <main className="admin-main">
           <Outlet />
         </main>
       </div>
+
+      {abierto && <div className="admin-overlay" onClick={cerrar} />}
     </div>
   )
 }
