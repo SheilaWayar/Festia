@@ -22,6 +22,7 @@ const TITULOS = {
 const FORM_VACIO = { motivo: "", deposito: "liberado", comentario: "", monto: "", metodo: "efectivo" };
 
 const yaTermino = (t) => new Date(`${t.fecha}T${t.hora_fin}`) <= new Date();
+const plata = (n) => "$" + Number(n || 0).toLocaleString("es-AR");
 
 export default function TurnosAdmin() {
   const [turnos, setTurnos] = useState([]);
@@ -30,7 +31,6 @@ export default function TurnosAdmin() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
 
-  // Ventana de acción: { tipo: "rechazar" | "finalizar" | "pago", turno }
   const [modal, setModal] = useState(null);
   const [form, setForm] = useState(FORM_VACIO);
   const [errorModal, setErrorModal] = useState(null);
@@ -64,8 +64,6 @@ export default function TurnosAdmin() {
     }
   }
 
-  // Mientras el backend nuevo no esté, Confirmar usa el endpoint viejo.
-  // Cuando exista PATCH /turnos/{id}/confirmar, cambiar por: turnosApi.confirmar(id)
   const confirmar = (id) => ejecutar(() => turnosApi.cambiarEstado(id, "confirmado"));
   const cancelar = (id) => ejecutar(() => turnosApi.cambiarEstado(id, "cancelado"));
 
@@ -154,14 +152,14 @@ export default function TurnosAdmin() {
               <p className="turno-meta">
                 {t.fecha} · {t.hora_inicio.slice(0, 5)} a {t.hora_fin.slice(0, 5)} h · {t.usuario_email}
               </p>
-              {t.monto_total > 0 && (
+              {Number(t.monto_total) > 0 && (
                 <p className="turno-meta">
-                  Total ${Number(t.monto_total).toLocaleString("es-AR")} · anticipo {t.anticipo_porcentaje}% ·{" "}
-                  {ESTADOS_PAGO[t.estado_pago] ?? t.estado_pago} · depósito {DEPOSITO[t.estado_deposito] ?? t.estado_deposito}
+                  Total {plata(t.monto_total)} · Pagado {plata(t.monto_pagado)} ·{" "}
+                  {ESTADOS_PAGO[t.estado_pago] ?? t.estado_pago} · Depósito {DEPOSITO[t.deposito] ?? t.deposito ?? "—"}
                 </p>
               )}
               {t.motivo_rechazo && <p className="turno-meta">Motivo del rechazo: {t.motivo_rechazo}</p>}
-              {t.comentario_deposito && <p className="turno-meta">Comentario del depósito: {t.comentario_deposito}</p>}
+              {t.comentario && <p className="turno-meta">Comentario del depósito: {t.comentario}</p>}
             </div>
             <span className={`badge badge-${t.estado}`}>{ESTADOS[t.estado] ?? t.estado}</span>
             <div className="turno-acciones">
@@ -176,7 +174,7 @@ export default function TurnosAdmin() {
                   Finalizar evento
                 </button>
               )}
-              {["confirmado", "finalizado"].includes(t.estado) && t.monto_total > 0 && t.estado_pago !== "pagado" && (
+              {["confirmado", "finalizado"].includes(t.estado) && Number(t.monto_total) > 0 && t.estado_pago !== "pagado" && (
                 <button className="btn-outline" type="button" onClick={() => abrirModal("pago", t)}>
                   Registrar pago
                 </button>
@@ -234,6 +232,7 @@ export default function TurnosAdmin() {
                   <select name="metodo" value={form.metodo} onChange={cambiarForm}>
                     <option value="efectivo">Efectivo</option>
                     <option value="transferencia">Transferencia</option>
+                    <option value="tarjeta_credito">Tarjeta de crédito</option>
                   </select>
                 </label>
               </>
@@ -254,4 +253,4 @@ export default function TurnosAdmin() {
       )}
     </>
   );
-}  
+}

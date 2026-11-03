@@ -1060,3 +1060,15 @@ button.nav-cta { cursor: pointer; background: none; font: inherit; }
 }
 .btn-whatsapp { border-color: #25d366; color: #25d366; text-decoration: none; display: inline-block; }
 .btn-whatsapp:hover { background: rgba(37, 211, 102, 0.12); }
+/* Listas desplegables en el tema verde */
+select { color-scheme: dark; }
+select option,
+select optgroup {
+  background-color: var(--surface-raised);
+  color: var(--ink);
+}
+select option:checked,
+select option:hover {
+  background-color: var(--gold);
+  color: #0a1f18;
+}

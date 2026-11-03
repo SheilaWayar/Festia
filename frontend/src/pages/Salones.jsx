@@ -10,6 +10,12 @@ import Carrusel from "../components/Carrusel";
 import { useSalones } from "../hooks/useSalones";
 import { HERO } from "../utils/imagenes";
 
+// Normaliza las imágenes de un salón a una lista de URLs
+const urlsDe = (s) =>
+  (Array.isArray(s.imagenes) ? s.imagenes : [])
+    .map((x) => (typeof x === "string" ? x : x?.url))
+    .filter(Boolean);
+
 export default function Salones() {
   const [params, setParams] = useSearchParams();
   const { hash } = useLocation();
@@ -39,13 +45,18 @@ export default function Salones() {
       { replace: true }
     );
 
-  // Imágenes del carrusel: fotos de los salones + la imagen de siempre
-  const deSalones = salones
-    .flatMap((s) => (Array.isArray(s.imagenes) ? s.imagenes : []))
-    .map((x) => (typeof x === "string" ? x : x?.url))
-    .filter(Boolean);
-  const fotos = [...new Set([...deSalones, HERO])].slice(0, 6);
-  console.log("FOTOS:", fotos);
+  // Carrusel: la primera foto de cada salón destacado, en el orden elegido.
+  // Si no hay ninguno destacado, se usan las fotos de los salones como antes.
+  const destacados = salones
+    .filter((s) => s.destacado)
+    .sort((a, b) => (a.orden_destacado ?? 0) - (b.orden_destacado ?? 0));
+
+  const deDestacados = destacados.map((s) => urlsDe(s)[0]).filter(Boolean);
+  const deSalones = salones.flatMap(urlsDe);
+
+  const fotos = deDestacados.length
+    ? [...new Set(deDestacados)].slice(0, 8)
+    : [...new Set([...deSalones, HERO])].slice(0, 6);
 
   // Para que "Contacto" del menú lleve a la sección aunque se venga de otra pantalla
   useEffect(() => {
