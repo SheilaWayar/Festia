@@ -114,6 +114,10 @@ export default function Salones() {
       setUbicando(false);
     }
     cambiarOrden("cerca");
+    // Como el botón está arriba y las tarjetas abajo, bajamos para que se vea el resultado
+    setTimeout(() => {
+      document.getElementById("salones")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
   }
 
   // Carrusel: la primera foto de cada salón destacado, en el orden elegido.
@@ -154,20 +158,8 @@ export default function Salones() {
 
       <BuscadorSalones />
 
-      {!hayFiltros && !cargando && !error && (
-        <NovedadesSalones salones={salones} onAbrir={setSeleccionado} />
-      )}
-
-      <section className="section venues-section" id="salones">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">Nuestra selección</span>
-            <h2>Espacios con <em>alma propia</em></h2>
-          </div>
-          <p>Cada salón ha sido elegido por su belleza, servicio excepcional y capacidad para crear momentos únicos.</p>
-        </div>
-
-        {/* Panel llamativo de "Cerca de mí" */}
+      {/* "Cerca de mí" va justo debajo de los filtros */}
+      <div className="cerca-wrap">
         <div className={`cerca-panel${ordenarPorCerca ? " activo" : ""}`}>
           <div className="cerca-panel__icono">
             <IconoUbicacion />
@@ -194,8 +186,22 @@ export default function Salones() {
             {ubicando ? "Buscando..." : ordenarPorCerca ? "Quitar orden" : "Cerca de mí"}
           </button>
         </div>
-
         {errorUbicacion && <p className="form-msg orden-aviso">{errorUbicacion}</p>}
+      </div>
+
+      {!hayFiltros && !cargando && !error && (
+        <NovedadesSalones salones={salones} onAbrir={setSeleccionado} />
+      )}
+
+      <section className="section venues-section" id="salones">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow">Nuestra selección</span>
+            <h2>Espacios con <em>alma propia</em></h2>
+          </div>
+          <p>Cada salón ha sido elegido por su belleza, servicio excepcional y capacidad para crear momentos únicos.</p>
+        </div>
+
         {hayImprecisos && (
           <p className="ayuda orden-aviso">
             Algunos salones todavía no tienen su ubicación cargada y aparecen al final.
