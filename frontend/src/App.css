@@ -1198,3 +1198,108 @@ select option:hover {
 .ubic-fila label { color: var(--gold-light); font-size: 10px; text-transform: uppercase; letter-spacing: .12em; font-weight: 700; }
 .ubic-acciones { display: flex; flex-wrap: wrap; gap: 10px; }
 @media (max-width: 440px) { .ubic-fila { grid-template-columns: 1fr; } }
+/* ===== Panel llamativo "Cerca de mí" ===== */
+.cerca-panel {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(195, 166, 104, .22), transparent 55%),
+    linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 100%);
+  border: 1px solid var(--gold);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .35), 0 0 0 4px rgba(195, 166, 104, .08);
+  transition: box-shadow .3s ease, transform .3s ease;
+}
+.cerca-panel:hover {
+  box-shadow: 0 22px 52px rgba(0, 0, 0, .42), 0 0 0 5px rgba(195, 166, 104, .14);
+}
+
+.cerca-panel__icono {
+  flex: none;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--emerald-dark);
+}
+/* Ondas que se expanden para llamar la atención */
+.cerca-panel__icono::before,
+.cerca-panel__icono::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--gold);
+  animation: cerca-onda 2.4s ease-out infinite;
+}
+.cerca-panel__icono::after { animation-delay: 1.2s; }
+
+@keyframes cerca-onda {
+  0%   { transform: scale(1);   opacity: .7; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+
+.cerca-panel__texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.cerca-panel__texto strong {
+  color: var(--white);
+  font-family: "Cormorant Garamond", serif;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.05;
+}
+.cerca-panel__texto span { color: rgba(255, 255, 255, .78); font-size: 13px; line-height: 1.6; }
+
+.cerca-panel__boton {
+  flex: none;
+  padding: 18px 34px;
+  background: var(--gold);
+  color: var(--emerald-dark);
+  border: 1px solid var(--gold-light);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+}
+.cerca-panel__boton:hover:not(:disabled) {
+  background: var(--gold-light);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .35);
+}
+.cerca-panel__boton:disabled { opacity: .7; cursor: wait; }
+
+/* Activo: el panel se vuelve dorado y el botón pasa a ser "Quitar orden" */
+.cerca-panel.activo {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+  border-color: var(--gold-light);
+}
+.cerca-panel.activo .cerca-panel__icono { background: var(--emerald-dark); color: var(--gold-light); }
+.cerca-panel.activo .cerca-panel__icono::before,
+.cerca-panel.activo .cerca-panel__icono::after { border-color: var(--emerald-dark); animation: none; opacity: 0; }
+.cerca-panel.activo .cerca-panel__texto strong { color: var(--emerald-dark); }
+.cerca-panel.activo .cerca-panel__texto span { color: rgba(6, 31, 26, .8); }
+.cerca-panel.activo .cerca-panel__boton {
+  background: var(--emerald-dark);
+  color: var(--gold-light);
+  border-color: var(--emerald-dark);
+}
+
+/* Celular: apilado y a todo el ancho */
+@media (max-width: 760px) {
+  .cerca-panel { flex-direction: column; text-align: center; padding: 22px 18px; gap: 16px; }
+  .cerca-panel__texto strong { font-size: 26px; }
+  .cerca-panel__boton { width: 100%; padding: 17px 20px; }
+}
+
+/* Si la persona prefiere menos movimiento, se apagan las ondas */
+@media (prefers-reduced-motion: reduce) {
+  .cerca-panel__icono::before,
+  .cerca-panel__icono::after { animation: none; opacity: 0; }
+  .cerca-panel, .cerca-panel__boton { transition: none; }
+}

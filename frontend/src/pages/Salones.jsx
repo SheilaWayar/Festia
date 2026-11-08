@@ -17,6 +17,25 @@ const urlsDe = (s) =>
     .map((x) => (typeof x === "string" ? x : x?.url))
     .filter(Boolean);
 
+function IconoUbicacion({ size = 28 }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z" />
+      <circle cx="12" cy="10" r="2.5" />
+    </svg>
+  );
+}
+
 export default function Salones() {
   const [params, setParams] = useSearchParams();
   const { hash } = useLocation();
@@ -44,7 +63,8 @@ export default function Salones() {
   const conDistancia = salones.map((s) => {
     const lat = Number(s.latitud);
     const lng = Number(s.longitud);
-    const tieneUbicacion = s.latitud != null && s.longitud != null && Number.isFinite(lat) && Number.isFinite(lng);
+    const tieneUbicacion =
+      s.latitud != null && s.longitud != null && Number.isFinite(lat) && Number.isFinite(lng);
     return {
       ...s,
       distanciaKm: miUbicacion && tieneUbicacion ? distanciaKm(miUbicacion, { lat, lng }) : null,
@@ -147,23 +167,31 @@ export default function Salones() {
           <p>Cada salón ha sido elegido por su belleza, servicio excepcional y capacidad para crear momentos únicos.</p>
         </div>
 
-        <div className="orden-bar">
+        {/* Panel llamativo de "Cerca de mí" */}
+        <div className={`cerca-panel${ordenarPorCerca ? " activo" : ""}`}>
+          <div className="cerca-panel__icono">
+            <IconoUbicacion />
+          </div>
+          <div className="cerca-panel__texto">
+            <strong>
+              {ordenarPorCerca
+                ? "Mostrando los salones más cercanos a vos"
+                : "Encontrá salones cerca de vos"}
+            </strong>
+            <span>
+              {ordenarPorCerca
+                ? "Ordenados del más cercano al más lejano."
+                : "Activá tu ubicación y te mostramos primero los que te quedan más cerca."}
+            </span>
+          </div>
           <button
             type="button"
-            className="btn-outline"
+            className="cerca-panel__boton"
             aria-pressed={ordenarPorCerca}
             disabled={ubicando}
             onClick={alternarCerca}
           >
-            {ubicando ? "Buscando tu ubicación..." : "Cerca de mí"}
-          </button>
-          <button
-            type="button"
-            className="btn-outline"
-            aria-pressed={recientes}
-            onClick={alternarRecientes}
-          >
-            Más recientes
+            {ubicando ? "Buscando..." : ordenarPorCerca ? "Quitar orden" : "Cerca de mí"}
           </button>
         </div>
 
@@ -173,6 +201,17 @@ export default function Salones() {
             Algunos salones todavía no tienen su ubicación cargada y aparecen al final.
           </p>
         )}
+
+        <div className="orden-bar">
+          <button
+            type="button"
+            className="btn-outline"
+            aria-pressed={recientes}
+            onClick={alternarRecientes}
+          >
+            Más recientes
+          </button>
+        </div>
 
         <div className="venue-grid">
           {cargando && <p className="empty-state">Cargando salones...</p>}
