@@ -1303,3 +1303,13 @@ select option:hover {
   .cerca-panel__icono::after { animation: none; opacity: 0; }
   .cerca-panel, .cerca-panel__boton { transition: none; }
 }
+/* ===== "Cerca de mí" debajo del buscador ===== */
+.cerca-wrap { max-width: 1280px; margin: 20px auto 0; padding: 0 24px; }
+.cerca-wrap .cerca-panel { margin-bottom: 0; padding: 20px 26px; }
+.cerca-wrap .cerca-panel__texto strong { font-size: 26px; }
+.cerca-wrap .orden-aviso { margin: 10px 0 0; }
+
+@media (max-width: 760px) {
+  .cerca-wrap { padding: 0 14px; }
+  .cerca-wrap .cerca-panel__texto strong { font-size: 24px; }
+}
