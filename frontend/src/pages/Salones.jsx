@@ -9,6 +9,7 @@ import Icono from "../components/Icono";
 import Carrusel from "../components/Carrusel";
 import { useSalones } from "../hooks/useSalones";
 import { HERO } from "../utils/imagenes";
+import { distanciaKm, obtenerMiUbicacion } from "../utils/ubicacion";
 
 // Normaliza las imágenes de un salón a una lista de URLs
 const urlsDe = (s) =>
@@ -22,6 +23,11 @@ export default function Salones() {
   const [seleccionado, setSeleccionado] = useState(null); // salón abierto en la tarjeta grande
   const cerrar = useCallback(() => setSeleccionado(null), []);
 
+  // Ubicación de la persona (solo se pide cuando toca "Cerca de mí")
+  const [miUbicacion, setMiUbicacion] = useState(null);
+  const [ubicando, setUbicando] = useState(false);
+  const [errorUbicacion, setErrorUbicacion] = useState("");
+
   const filtros = {
     tipo_evento: params.get("tipo_evento") ?? "",
     capacidad_min: params.get("capacidad_min") ?? "",
@@ -30,20 +36,65 @@ export default function Salones() {
   const { salones, cargando, error } = useSalones(filtros);
   const hayFiltros = Object.values(filtros).some(Boolean);
 
-  // Más recientes: los salones cargados después tienen id mayor
-  const recientes = params.get("orden") === "recientes";
-  const lista = recientes ? [...salones].sort((a, b) => b.id - a.id) : salones;
+  const orden = params.get("orden"); // "recientes" | "cerca" | null
+  const recientes = orden === "recientes";
+  const ordenarPorCerca = orden === "cerca" && Boolean(miUbicacion);
 
-  const alternarOrden = () =>
+  // A cada salón le agregamos la distancia (si tiene coordenadas y conocemos la ubicación)
+  const conDistancia = salones.map((s) => {
+    const lat = Number(s.latitud);
+    const lng = Number(s.longitud);
+    const tieneUbicacion = s.latitud != null && s.longitud != null && Number.isFinite(lat) && Number.isFinite(lng);
+    return {
+      ...s,
+      distanciaKm: miUbicacion && tieneUbicacion ? distanciaKm(miUbicacion, { lat, lng }) : null,
+    };
+  });
+
+  let lista = conDistancia;
+  if (ordenarPorCerca) {
+    // Los salones sin coordenadas quedan al final
+    lista = [...conDistancia].sort((a, b) => {
+      if (a.distanciaKm == null && b.distanciaKm == null) return 0;
+      if (a.distanciaKm == null) return 1;
+      if (b.distanciaKm == null) return -1;
+      return a.distanciaKm - b.distanciaKm;
+    });
+  } else if (recientes) {
+    // Más recientes: los salones cargados después tienen id mayor
+    lista = [...conDistancia].sort((a, b) => b.id - a.id);
+  }
+  const hayImprecisos = ordenarPorCerca && conDistancia.some((s) => s.distanciaKm == null);
+
+  const cambiarOrden = (valor) =>
     setParams(
       (prev) => {
         const n = new URLSearchParams(prev);
-        if (n.get("orden") === "recientes") n.delete("orden");
-        else n.set("orden", "recientes");
+        if (valor) n.set("orden", valor);
+        else n.delete("orden");
         return n;
       },
       { replace: true }
     );
+
+  const alternarRecientes = () => cambiarOrden(recientes ? null : "recientes");
+
+  async function alternarCerca() {
+    if (ordenarPorCerca) return cambiarOrden(null);
+    setErrorUbicacion("");
+    if (!miUbicacion) {
+      setUbicando(true);
+      try {
+        setMiUbicacion(await obtenerMiUbicacion());
+      } catch (e) {
+        setErrorUbicacion(e.message);
+        setUbicando(false);
+        return;
+      }
+      setUbicando(false);
+    }
+    cambiarOrden("cerca");
+  }
 
   // Carrusel: la primera foto de cada salón destacado, en el orden elegido.
   // Si no hay ninguno destacado, se usan las fotos de los salones como antes.
@@ -100,12 +151,28 @@ export default function Salones() {
           <button
             type="button"
             className="btn-outline"
+            aria-pressed={ordenarPorCerca}
+            disabled={ubicando}
+            onClick={alternarCerca}
+          >
+            {ubicando ? "Buscando tu ubicación..." : "Cerca de mí"}
+          </button>
+          <button
+            type="button"
+            className="btn-outline"
             aria-pressed={recientes}
-            onClick={alternarOrden}
+            onClick={alternarRecientes}
           >
             Más recientes
           </button>
         </div>
+
+        {errorUbicacion && <p className="form-msg orden-aviso">{errorUbicacion}</p>}
+        {hayImprecisos && (
+          <p className="ayuda orden-aviso">
+            Algunos salones todavía no tienen su ubicación cargada y aparecen al final.
+          </p>
+        )}
 
         <div className="venue-grid">
           {cargando && <p className="empty-state">Cargando salones...</p>}

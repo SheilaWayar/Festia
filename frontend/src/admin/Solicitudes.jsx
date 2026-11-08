@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 const f = (n) => (n == null ? '—' : '$' + Number(n).toLocaleString('es-AR'))
-const color = {
-  pendiente: 'bg-yellow-100 text-yellow-700',
-  aprobada: 'bg-green-100 text-green-700',
-  rechazada: 'bg-red-100 text-red-700',
+const BADGE = { pendiente: 'badge-pendiente', aprobada: 'badge-confirmado', rechazada: 'badge-rechazado' }
+const ETIQUETA_DOC = {
+  arca_dueno1: 'Alta de ARCA · dueño 1',
+  servicio_dueno1: 'Luz/gas · dueño 1',
+  arca_dueno2: 'Alta de ARCA · dueño 2',
+  servicio_dueno2: 'Luz/gas · dueño 2',
 }
 
 // El superadmin aprueba o rechaza pedidos de pasar de usuario a salón
@@ -23,13 +25,12 @@ export default function Solicitudes() {
     const ids = [...new Set(filas.map((s) => s.user_id))]
     let mapa = {}
     if (ids.length) {
-      const { data: ps } = await supabase.from('perfiles').select('id, nombre, email').in('id', ids)
+      const { data: ps } = await supabase.from('perfiles').select('id, nombre, apellido, dni, email').in('id', ids)
       mapa = Object.fromEntries((ps || []).map((p) => [p.id, p]))
     }
     return { filas, mapa }
   }
 
-  // Carga inicial
   useEffect(() => {
     let vivo = true
     traer().then(({ filas, mapa }) => {
@@ -40,11 +41,21 @@ export default function Solicitudes() {
     return () => { vivo = false }
   }, [])
 
-  // Recarga después de aprobar o rechazar
   const recargar = async () => {
     const { filas, mapa } = await traer()
     setLista(filas)
     setDuenos(mapa)
+  }
+
+  // Abre el documento con un enlace temporal (5 min); el bucket es privado
+  const verDoc = async (path) => {
+    const ventana = window.open('', '_blank') // se abre antes para que el navegador no la bloquee
+    const { data, error } = await supabase.storage.from('documentos-salon').createSignedUrl(path, 300)
+    if (error || !data?.signedUrl) {
+      ventana?.close()
+      return setMsg('No se pudo abrir el documento: ' + (error?.message ?? 'sin acceso'))
+    }
+    if (ventana) ventana.location.href = data.signedUrl
   }
 
   const aprobar = async (s) => {
@@ -69,52 +80,67 @@ export default function Solicitudes() {
   const resueltas = lista.filter((s) => s.estado !== 'pendiente')
 
   return (
-    <div className='space-y-4'>
-      <h1 className='text-xl font-semibold'>Solicitudes de salón</h1>
-      {msg && <p className='rounded bg-indigo-50 p-3 text-sm text-indigo-700'>{msg}</p>}
+    <div className='sol'>
+      <h2>Solicitudes de salón</h2>
+      {msg && <p className='form-msg is-ok'>{msg}</p>}
 
-      <section className='space-y-3'>
-        <h2 className='font-medium'>Pendientes ({pendientes.length})</h2>
+      <section className='sol-lista'>
+        <h3>Pendientes ({pendientes.length})</h3>
         {pendientes.map((s) => {
           const d = duenos[s.user_id]
+          const docs = Object.entries(s.documentos || {})
           return (
-            <div key={s.id} className='space-y-2 rounded-lg border bg-white p-4 text-sm'>
-              <div className='flex flex-wrap items-start justify-between gap-2'>
+            <div key={s.id} className='sol-card'>
+              <div className='sol-cab'>
                 <div>
-                  <p className='text-base font-medium'>{s.nombre}</p>
-                  <p className='text-gray-500'>{d ? (d.nombre || d.email) + ' · ' + d.email : s.user_id}</p>
+                  <h3>{s.nombre}</h3>
+                  <p className='sol-meta'>
+                    Dueño 1: {d ? `${d.nombre ?? ''} ${d.apellido ?? ''} · DNI ${d.dni ?? '—'} · ${d.email}` : s.user_id}
+                  </p>
+                  {s.dueno2_nombre && (
+                    <p className='sol-meta'>Dueño 2: {s.dueno2_nombre} · DNI {s.dueno2_dni}</p>
+                  )}
                 </div>
-                <span className={'rounded px-2 py-0.5 text-xs ' + color[s.estado]}>{s.estado}</span>
+                <span className={`badge ${BADGE[s.estado] ?? ''}`}>{s.estado}</span>
               </div>
-              {s.descripcion && <p className='text-gray-700'>{s.descripcion}</p>}
-              <p className='text-gray-500'>
+
+              {s.descripcion && <p className='sol-meta'>{s.descripcion}</p>}
+              <p className='sol-meta'>
                 {s.direccion || 'Sin dirección'} · Capacidad {s.capacidad ?? '—'} · Precio {f(s.precio)} · Tel. {s.telefono || '—'}
               </p>
+
+              <div className='sol-docs'>
+                {docs.length === 0 && <span className='sol-meta'>Sin documentos adjuntos</span>}
+                {docs.map(([tipo, path]) => (
+                  <button key={tipo} type='button' className='btn-outline' onClick={() => verDoc(path)}>
+                    Ver {ETIQUETA_DOC[tipo] ?? tipo}
+                  </button>
+                ))}
+              </div>
+
               <input
+                className='sol-input'
                 placeholder='Motivo del rechazo (opcional)'
                 value={motivo[s.id] || ''}
                 onChange={(e) => setMotivo({ ...motivo, [s.id]: e.target.value })}
-                className='w-full rounded border px-3 py-2'
               />
-              <div className='flex gap-2'>
-                <button disabled={ocupado === s.id} onClick={() => aprobar(s)}
-                  className='rounded bg-green-600 px-4 py-2 text-white disabled:opacity-50'>Aprobar</button>
-                <button disabled={ocupado === s.id} onClick={() => rechazar(s)}
-                  className='rounded bg-red-600 px-4 py-2 text-white disabled:opacity-50'>Rechazar</button>
+              <div className='sol-acciones'>
+                <button type='button' className='primary-button' disabled={ocupado === s.id} onClick={() => aprobar(s)}>Aprobar</button>
+                <button type='button' className='btn-danger' disabled={ocupado === s.id} onClick={() => rechazar(s)}>Rechazar</button>
               </div>
             </div>
           )
         })}
-        {!pendientes.length && <p className='text-sm text-gray-400'>No hay solicitudes pendientes.</p>}
+        {!pendientes.length && <p className='sol-meta'>No hay solicitudes pendientes.</p>}
       </section>
 
       {resueltas.length > 0 && (
-        <section className='space-y-2'>
-          <h2 className='font-medium'>Resueltas</h2>
+        <section className='sol-lista'>
+          <h3>Resueltas</h3>
           {resueltas.map((s) => (
-            <div key={s.id} className='flex items-center justify-between rounded-lg border bg-white p-3 text-sm'>
-              <span>{s.nombre} <span className='text-gray-400'>· {duenos[s.user_id]?.email}</span></span>
-              <span className={'rounded px-2 py-0.5 text-xs ' + color[s.estado]}>{s.estado}</span>
+            <div key={s.id} className='sol-fila'>
+              <span>{s.nombre} <span className='sol-meta'>· {duenos[s.user_id]?.email}</span></span>
+              <span className={`badge ${BADGE[s.estado] ?? ''}`}>{s.estado}</span>
             </div>
           ))}
         </section>

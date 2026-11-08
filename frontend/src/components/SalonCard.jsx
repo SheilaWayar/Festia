@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
 import Icono from "./Icono";
-import CalendarioSalon from "./CalendarioSalon";
 import Estrellas from "./Estrellas";
 import { useResumenResenas } from "../hooks/useResumenResenas";
 import { alFallarImagen, fotoDe } from "../utils/imagenes";
+import { formatearDistancia } from "../utils/ubicacion";
 
 // Toda la tarjeta es clickeable: el botón del título se estira sobre ella (ver .card-abrir en App.css).
+// El calendario de disponibilidad se ve solo al abrir el salón (SalonModal).
 export default function SalonCard({ salon, onAbrir }) {
   const nombre = salon.nombre ?? "Salón sin nombre";
   const resumen = useResumenResenas(salon.id);
@@ -45,6 +46,10 @@ export default function SalonCard({ salon, onAbrir }) {
           )}
         </div>
 
+        {salon.distanciaKm != null && (
+          <p className="card-distancia">Ubicado {formatearDistancia(salon.distanciaKm)} de vos</p>
+        )}
+
         <p>{salon.descripcion ?? "Sin descripción disponible."}</p>
 
         <div className="card-meta">
@@ -52,10 +57,6 @@ export default function SalonCard({ salon, onAbrir }) {
           {salon.precio_por_hora != null && (
             <strong>${salon.precio_por_hora.toLocaleString("es-AR")} / hora</strong>
           )}
-        </div>
-
-        <div className="cal-en-card" aria-label={`Disponibilidad de ${nombre}`}>
-          <CalendarioSalon salonId={salon.id} inline />
         </div>
 
         <Link className="text-button" to={`/salones/${salon.id}/reservar`}>

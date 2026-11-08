@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { salonesApi } from "../../services/salonesApi";
-import { normalizarWhatsapp } from "../../utils/whatsapp"; 
+import { normalizarWhatsapp } from "../../utils/whatsapp";
+import { buscarCoordenadas } from "../../utils/ubicacion";
 
 const VACIO = {
   nombre: "",
@@ -12,10 +13,13 @@ const VACIO = {
   servicios: "",
   imagenes: "",
   tipos_evento: [],
-  whatsapp: "", // <-- 1. Agregado al objeto vacío inicial
+  whatsapp: "",
+  latitud: "",
+  longitud: "",
 };
 
 const aLista = (txt) => txt.split(",").map((x) => x.trim()).filter(Boolean);
+const aNumero = (v) => Number(String(v).trim().replace(",", "."));
 
 // Sirve para agregar un salón nuevo y para editar uno existente (/admin/salones/:id)
 export default function SalonForm() {
@@ -27,6 +31,8 @@ export default function SalonForm() {
   const [nuevoTipo, setNuevoTipo] = useState("");
   const [error, setError] = useState("");
   const [enviando, setEnviando] = useState(false);
+  const [buscando, setBuscando] = useState(false);
+  const [ubicMsg, setUbicMsg] = useState({ texto: "", ok: false });
 
   useEffect(() => {
     salonesApi.tiposEvento().then(setTipos).catch(() => setTipos([]));
@@ -43,7 +49,9 @@ export default function SalonForm() {
             servicios: (s.servicios ?? []).join(", "),
             imagenes: (s.imagenes ?? []).join(", "),
             tipos_evento: s.tipos_evento ?? [],
-            whatsapp: s.whatsapp ?? "", // <-- 2. Cargado al editar un salón existente
+            whatsapp: s.whatsapp ?? "",
+            latitud: s.latitud ?? "",
+            longitud: s.longitud ?? "",
           })
         )
         .catch((e) => setError(e.message));
@@ -71,13 +79,49 @@ export default function SalonForm() {
     setNuevoTipo("");
   }
 
+  // Busca latitud y longitud a partir de la dirección escrita
+  async function buscarUbicacion() {
+    if (!form.direccion.trim()) {
+      return setUbicMsg({ texto: "Primero escribí la dirección del salón.", ok: false });
+    }
+    setBuscando(true);
+    setUbicMsg({ texto: "Buscando…", ok: true });
+    try {
+      const { latitud, longitud } = await buscarCoordenadas(form.direccion);
+      setForm((f) => ({ ...f, latitud, longitud }));
+      setUbicMsg({ texto: "Encontrada. Tocá “Ver en el mapa” para confirmar el punto.", ok: true });
+    } catch (e) {
+      setUbicMsg({ texto: e.message, ok: false });
+    } finally {
+      setBuscando(false);
+    }
+  }
+
   async function guardar(e) {
     e.preventDefault();
     setError("");
 
-    // <-- 3. Validación de WhatsApp requerida por la guía[cite: 8]
     if (form.whatsapp && !normalizarWhatsapp(form.whatsapp)) {
       return setError("El WhatsApp debe tener 10 dígitos (código de área + número).");
+    }
+
+    // Ubicación: o están las dos, o ninguna
+    const hayLat = String(form.latitud).trim() !== "";
+    const hayLng = String(form.longitud).trim() !== "";
+    let latitud = null;
+    let longitud = null;
+    if (hayLat !== hayLng) {
+      return setError("Completá latitud y longitud, o dejá las dos vacías.");
+    }
+    if (hayLat && hayLng) {
+      latitud = aNumero(form.latitud);
+      longitud = aNumero(form.longitud);
+      if (!Number.isFinite(latitud) || !Number.isFinite(longitud)) {
+        return setError("La latitud y la longitud tienen que ser números.");
+      }
+      if (latitud < -90 || latitud > 90 || longitud < -180 || longitud > 180) {
+        return setError("La ubicación está fuera de rango. Revisá que latitud y longitud no estén cambiadas.");
+      }
     }
 
     setEnviando(true);
@@ -91,7 +135,9 @@ export default function SalonForm() {
       servicios: aLista(form.servicios),
       imagenes: aLista(form.imagenes),
       tipos_evento: form.tipos_evento,
-      whatsapp: form.whatsapp ? form.whatsapp.trim() : null, // <-- 4. Incluido en los datos que viajan al backend[cite: 8]
+      whatsapp: form.whatsapp ? form.whatsapp.trim() : null,
+      latitud,
+      longitud,
     };
 
     try {
@@ -104,6 +150,14 @@ export default function SalonForm() {
       setEnviando(false);
     }
   }
+
+  const latNum = aNumero(form.latitud);
+  const lngNum = aNumero(form.longitud);
+  const hayPunto =
+    String(form.latitud).trim() !== "" &&
+    String(form.longitud).trim() !== "" &&
+    Number.isFinite(latNum) &&
+    Number.isFinite(lngNum);
 
   return (
     <div className="auth">
@@ -125,9 +179,53 @@ export default function SalonForm() {
           <label>
             Dirección
             <input name="direccion" value={form.direccion} onChange={cambiar} required />
+            <span className="ayuda">Incluí la ciudad y la provincia para que la ubicación se encuentre bien.</span>
           </label>
 
-          {/* <-- 5. Campo de WhatsApp agregado en el JSX[cite: 8] */}
+          <fieldset>
+            <legend>Ubicación en el mapa (para “Cerca de mí”)</legend>
+            <div className="ubic-fila">
+              <label>
+                Latitud
+                <input
+                  name="latitud"
+                  value={form.latitud}
+                  onChange={cambiar}
+                  inputMode="decimal"
+                  placeholder="-34.6037"
+                />
+              </label>
+              <label>
+                Longitud
+                <input
+                  name="longitud"
+                  value={form.longitud}
+                  onChange={cambiar}
+                  inputMode="decimal"
+                  placeholder="-58.3816"
+                />
+              </label>
+            </div>
+            <div className="ubic-acciones">
+              <button className="btn-outline" type="button" onClick={buscarUbicacion} disabled={buscando}>
+                {buscando ? "Buscando..." : "Buscar ubicación por dirección"}
+              </button>
+              {hayPunto && (
+                <a
+                  className="btn-outline"
+                  href={`https://www.google.com/maps?q=${latNum},${lngNum}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Ver en el mapa
+                </a>
+              )}
+            </div>
+            {ubicMsg.texto && (
+              <p className={`form-msg${ubicMsg.ok ? " is-ok" : ""}`}>{ubicMsg.texto}</p>
+            )}
+          </fieldset>
+
           <label>
             WhatsApp del salón
             <input
@@ -188,4 +286,4 @@ export default function SalonForm() {
       </div>
     </div>
   );
-}  
+}

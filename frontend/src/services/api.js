@@ -117,7 +117,19 @@ const rutas = [
       salon_id: b.salon_id, fecha: b.fecha, hora_inicio: b.hora_inicio,
       hora_fin: b.hora_fin, tipo_evento: b.tipo_evento ?? null,
     }).select('id').single())
-    return turnoPorId(fila.id)
+    const turno = await turnoPorId(fila.id)
+
+    // >>> NUEVO: mail al cliente con el salón solicitado.
+    // Si el mail falla, la reserva igual queda creada (no se frena nada).
+    supabase.functions
+      .invoke('enviar-mail-reserva', { body: { turno_id: fila.id } })
+      .then(({ error }) => {
+        if (error) console.warn('No se pudo enviar el mail de la reserva')
+      })
+      .catch(() => {})
+    // <<< fin de lo nuevo
+
+    return turno
   }],
   ['GET', 'turnos/mios', async () => {
     const uid = await usuarioId()

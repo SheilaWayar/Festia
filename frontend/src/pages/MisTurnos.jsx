@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { turnosApi } from "../services/turnosApi";
+import { supabase } from "../lib/supabase";
+import { usePerfil } from "../lib/usePerfil";
 import BotonWhatsapp from "../components/BotonWhatsapp";
 import BotonPagar from "../components/BotonPagar";
 import { useAuth } from "../context/AuthContext";
@@ -31,15 +33,16 @@ const fechaLarga = (iso) =>
 
 export default function MisTurnos() {
   const { sesion } = useAuth();
+  const { user } = usePerfil();
   const [params] = useSearchParams();
   const pago = params.get("pago");
   const [turnos, setTurnos] = useState([]);
-  const [cargando, setCargando] = useState(true); // arranca en true: la primera carga ya está "cargando"
+  const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const [mensaje, setMensaje] = useState({ texto: "", ok: false });
   const [cancelando, setCancelando] = useState(null);
+  const [descargando, setDescargando] = useState(null); // "reserva-<id>" | "pago-<id>"
 
-  // Pide los turnos. No cambia estados de forma inmediata, solo cuando responde el servidor.
   function traer() {
     return turnosApi
       .mios()
@@ -68,7 +71,7 @@ export default function MisTurnos() {
   async function cancelar(t) {
     if (!window.confirm(`¿Cancelar tu turno en ${t.salon_nombre}?`)) return;
     setMensaje({ texto: "", ok: false });
-    setCancelando(t.id); // evita el doble clic
+    setCancelando(t.id);
     try {
       await turnosApi.cancelar(t.id);
       setTurnos((lista) => lista.map((x) => (x.id === t.id ? { ...x, estado: "cancelado" } : x)));
@@ -77,6 +80,28 @@ export default function MisTurnos() {
       setMensaje({ texto: err.message, ok: false });
     } finally {
       setCancelando(null);
+    }
+  }
+
+  // Genera el PDF en el navegador (la librería se carga recién al tocar el botón)
+  async function descargar(tipo, t) {
+    if (!user) return;
+    setMensaje({ texto: "", ok: false });
+    setDescargando(`${tipo}-${t.id}`);
+    try {
+      const { data: perfil } = await supabase
+        .from("perfiles")
+        .select("nombre, apellido, dni")
+        .eq("id", user.id)
+        .single();
+      const pdf = await import("../utils/pdf");
+      if (tipo === "reserva") await pdf.comprobanteReserva(t, perfil);
+      else await pdf.comprobantePago(t, perfil);
+    } catch (err) {
+      console.error(err);
+      setMensaje({ texto: "No se pudo generar el PDF. Probá de nuevo.", ok: false });
+    } finally {
+      setDescargando(null);
     }
   }
 
@@ -111,6 +136,8 @@ export default function MisTurnos() {
         {turnos.map((t) => {
           const inactivo = ["cancelado", "rechazado"].includes(t.estado);
           const puedeCancelar = ["pendiente", "confirmado"].includes(t.estado);
+          const hayComprobante = !inactivo;
+          const hayPago = Number(t.monto_pagado) > 0;
           return (
             <article key={t.id} className={`turno-card${inactivo ? " is-cancelled" : ""}`}>
               <div>
@@ -139,6 +166,25 @@ export default function MisTurnos() {
                 )}
 
                 <BotonPagar turno={t} />
+
+                {(hayComprobante || hayPago) && (
+                  <div className="turno-docs">
+                    {hayComprobante && (
+                      <button className="btn-outline" type="button"
+                        disabled={descargando === `reserva-${t.id}`}
+                        onClick={() => descargar("reserva", t)}>
+                        {descargando === `reserva-${t.id}` ? "Generando..." : "Comprobante de reserva (PDF)"}
+                      </button>
+                    )}
+                    {hayPago && (
+                      <button className="btn-outline" type="button"
+                        disabled={descargando === `pago-${t.id}`}
+                        onClick={() => descargar("pago", t)}>
+                        {descargando === `pago-${t.id}` ? "Generando..." : "Comprobante de pago (PDF)"}
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
               <span className={`badge badge-${t.estado}`}>{ESTADOS[t.estado] ?? t.estado}</span>
               {puedeCancelar && (
