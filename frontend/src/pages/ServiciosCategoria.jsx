@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Estrellas from "../components/Estrellas";
 import Icono from "../components/Icono";
-import ProveedorModal from "../components/ProveedorModal";
 import { categoriaDe, serviciosApi } from "../services/serviciosApi";
 import { alFallarImagen } from "../utils/imagenes";
 import { enlaceFacebook, enlaceInstagram, enlaceWhatsapp } from "../utils/contacto";
@@ -17,8 +16,6 @@ export default function ServiciosCategoria() {
   const [resumenes, setResumenes] = useState({});
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
-  const [abierto, setAbierto] = useState(null); // proveedor abierto en la ficha grande
-  const cerrar = useCallback(() => setAbierto(null), []);
 
   useEffect(() => {
     if (!categoria) return;
@@ -36,9 +33,6 @@ export default function ServiciosCategoria() {
       .finally(() => vivo && setCargando(false));
     return () => { vivo = false; };
   }, [valor, categoria]);
-
-  const refrescarResumenes = () =>
-    serviciosApi.resumenes().then(setResumenes).catch(() => {});
 
   if (!categoria) {
     return (
@@ -78,16 +72,17 @@ export default function ServiciosCategoria() {
         {ordenados.map((s) => {
           const foto = s.imagenes?.[0];
           const resumen = resumenes[s.id];
+          const detalle = `/servicios/${valor}/${s.id}`;
           const wa = enlaceWhatsapp(s.whatsapp, `Hola! Vi tu servicio "${s.nombre}" en Festia y quiero consultar.`);
           const ig = enlaceInstagram(s.instagram);
           const fb = enlaceFacebook(s.facebook);
           return (
             <article key={s.id} className="srv-card">
-              <button
-                type="button"
+              <Link
+                to={detalle}
                 className="srv-foto-btn"
+                style={{ display: "block" }}
                 aria-label={`Ver detalle de ${s.nombre}`}
-                onClick={() => setAbierto(s)}
               >
                 {foto ? (
                   <img className="srv-foto" src={foto} alt="" loading="lazy" onError={alFallarImagen} />
@@ -96,7 +91,7 @@ export default function ServiciosCategoria() {
                     {s.nombre.charAt(0).toUpperCase()}
                   </div>
                 )}
-              </button>
+              </Link>
 
               <div className="srv-cuerpo">
                 <span className="srv-cat">{categoria.etiqueta}</span>
@@ -138,23 +133,14 @@ export default function ServiciosCategoria() {
                   )}
                 </div>
 
-                <button type="button" className="text-button" onClick={() => setAbierto(s)}>
+                <Link className="text-button" to={detalle}>
                   Ver detalle y reseñas <Icono nombre="arrow" size={16} />
-                </button>
+                </Link>
               </div>
             </article>
           );
         })}
       </div>
-
-      {abierto && (
-        <ProveedorModal
-          proveedor={abierto}
-          resumen={resumenes[abierto.id]}
-          onCerrar={cerrar}
-          onCambio={refrescarResumenes}
-        />
-      )}
     </section>
   );
 }

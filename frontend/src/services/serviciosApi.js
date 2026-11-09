@@ -51,6 +51,18 @@ export const serviciosApi = {
     );
   },
 
+  // Un proveedor activo por id (página de detalle). Devuelve null si no existe.
+  async porId(id) {
+    return revisar(
+      await supabase
+        .from("proveedores")
+        .select("*")
+        .eq("id", id)
+        .eq("activo", true)
+        .maybeSingle()
+    );
+  },
+
   // Todos (panel admin)
   async todos() {
     return revisar(

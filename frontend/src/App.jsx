@@ -21,9 +21,10 @@ import HistorialSalon from "./pages/admin/HistorialSalon";
 import TurnosAdmin from "./pages/admin/TurnosAdmin";
 import ServiciosAdmin from "./pages/admin/ServiciosAdmin";
 
-// Proveedores (registro y edición de ficha)
+// Proveedores (registro, edición de ficha y detalle público)
 import ProveedorRegistro from "./pages/proveedores/ProveedorRegistro";
 import MiFichaProveedor from "./pages/proveedores/MiFichaProveedor";
+import ProveedorDetalle from "./pages/proveedores/ProveedorDetalle";
 
 // Pantallas nuevas (carpeta src/admin/)
 import RequireRole from "./admin/RequireRole";
@@ -58,6 +59,7 @@ export default function App() {
         />
         <Route path="/servicios" element={<Servicios />} />
         <Route path="/servicios/:categoria" element={<ServiciosCategoria />} />
+        <Route path="/servicios/:categoria/:id" element={<ProveedorDetalle />} />
         <Route
           path="/mis-turnos"
           element={<RutaProtegida><MisTurnos /></RutaProtegida>}
