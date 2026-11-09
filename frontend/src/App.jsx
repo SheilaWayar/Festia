@@ -10,12 +10,20 @@ import Reservar from "./pages/Reservar";
 import MisTurnos from "./pages/MisTurnos";
 import MiPerfil from "./pages/MiPerfil";
 import Login from "./pages/Login";
+import RestablecerPassword from "./pages/RestablecerPassword";
 import QuieroSerSalon from "./pages/QuieroSerSalon";
+import Servicios from "./pages/Servicios";
+import ServiciosCategoria from "./pages/ServiciosCategoria";
 import PanelAdmin from "./pages/admin/PanelAdmin";
 import SalonesAdmin from "./pages/admin/SalonesAdmin";
 import SalonForm from "./pages/admin/SalonForm";
 import HistorialSalon from "./pages/admin/HistorialSalon";
 import TurnosAdmin from "./pages/admin/TurnosAdmin";
+import ServiciosAdmin from "./pages/admin/ServiciosAdmin";
+
+// Proveedores (registro y edición de ficha)
+import ProveedorRegistro from "./pages/proveedores/ProveedorRegistro";
+import MiFichaProveedor from "./pages/proveedores/MiFichaProveedor";
 
 // Pantallas nuevas (carpeta src/admin/)
 import RequireRole from "./admin/RequireRole";
@@ -48,16 +56,24 @@ export default function App() {
           path="/salones/:id/reservar"
           element={<RutaProtegida><Reservar /></RutaProtegida>}
         />
+        <Route path="/servicios" element={<Servicios />} />
+        <Route path="/servicios/:categoria" element={<ServiciosCategoria />} />
         <Route
           path="/mis-turnos"
           element={<RutaProtegida><MisTurnos /></RutaProtegida>}
         />
         <Route
           path="/mi-perfil"
-          element={<RutaProtegida><MiPerfil /></RutaProtegida>}
+          element={<RutaProtegida requiereDatos={false}><MiPerfil /></RutaProtegida>}
         />
         <Route path="/quiero-ser-salon" element={<QuieroSerSalon />} />
+
+        {/* Proveedores: ambas pantallas ya manejan el caso "no logueado" */}
+        <Route path="/proveedores/registro" element={<ProveedorRegistro />} />
+        <Route path="/mi-ficha" element={<MiFichaProveedor />} />
+
         <Route path="/login" element={<Login />} />
+        <Route path="/restablecer" element={<RestablecerPassword />} />
         <Route path="*" element={<p className="empty-state">Página no encontrada</p>} />
       </Route>
 
@@ -76,6 +92,7 @@ export default function App() {
         <Route path="salones/nuevo" element={<SalonForm />} />
         <Route path="salones/:id" element={<SalonForm />} />
         <Route path="salones/:id/historial" element={<HistorialSalon />} />
+        <Route path="servicios" element={<ServiciosAdmin />} />
         <Route path="turnos" element={<TurnosAdmin />} />
         <Route path="pagos" element={<TurnosAdmin />} />
 

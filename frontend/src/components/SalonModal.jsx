@@ -4,6 +4,7 @@ import Icono from "./Icono";
 import Estrellas from "./Estrellas";
 import CalendarioSalon from "./CalendarioSalon";
 import Resenas from "./Resenas";
+import RedesSociales from "./RedesSociales"; // NUEVO
 import { useResumenResenas } from "../hooks/useResumenResenas";
 import { alFallarImagen, fotoDe } from "../utils/imagenes";
 
@@ -138,6 +139,8 @@ export default function SalonModal({ salon, onCerrar }) {
                   {salon.direccion && (
                     <p className="detalle-direccion">Dirección: {salon.direccion}</p>
                   )}
+
+                  <RedesSociales salon={salon} /> {/* NUEVO */}
                 </div>
 
                 <div className="modal-salon__calendario">

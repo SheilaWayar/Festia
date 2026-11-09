@@ -119,6 +119,7 @@ export default function Navbar() {
 
       <nav className={`nav${abierto ? " open" : ""}`}>
         <NavLink to="/salones" onClick={cerrarMenu}>Salones</NavLink>
+        <NavLink to="/servicios" onClick={cerrarMenu}>Servicios</NavLink>
         {perfil?.rol === "usuario" && (
           <NavLink to="/quiero-ser-salon" onClick={cerrarMenu}>Publicar mi salón</NavLink>
         )}

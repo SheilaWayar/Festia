@@ -23,7 +23,12 @@ export default function AdminLayout() {
         ['/admin/historial', 'Historial'],
         ['/admin/clientes', 'Clientes'],
         ['/admin/mi-salon', 'Mi salón'],
-        ...(sesion?.rol !== 'salon' ? [['/admin/salones', 'Salones']] : []),
+        ...(sesion?.rol !== 'salon'
+          ? [
+              ['/admin/salones', 'Salones'],
+              ['/admin/servicios', 'Servicios'],
+            ]
+          : []),
       ],
     },
     ...(esSuperadmin

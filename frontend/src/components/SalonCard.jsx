@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Icono from "./Icono";
 import Estrellas from "./Estrellas";
+import RedesSociales from "./RedesSociales";
 import { useResumenResenas } from "../hooks/useResumenResenas";
 import { alFallarImagen, fotoDe } from "../utils/imagenes";
 import { formatearDistancia } from "../utils/ubicacion";
@@ -58,6 +59,8 @@ export default function SalonCard({ salon, onAbrir }) {
             <strong>${salon.precio_por_hora.toLocaleString("es-AR")} / hora</strong>
           )}
         </div>
+
+        <RedesSociales salon={salon} className="redes--card" />
 
         <Link className="text-button" to={`/salones/${salon.id}/reservar`}>
           Reservar <Icono nombre="arrow" size={17} />
