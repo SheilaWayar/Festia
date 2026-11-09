@@ -1,0 +1,23 @@
+input, textarea {
+  caret-color: #e2bf75;
+}
+::selection {
+  background: rgba(226, 191, 117, 0.35);
+  color: #f3ead7;
+}
+
+/* Cursor: flecha dorada con brillo y destello.
+   En links y botones el destello se hace más grande. */
+@media (hover: hover) and (pointer: fine) {
+  body,
+  body * {
+    cursor: url("/cursors/flecha.svg") 5 3, auto !important;
+  }
+  a, a *, button, button *, [role="button"], select, label {
+    cursor: url("/cursors/flecha-link.svg") 5 3, pointer !important;
+  }
+  input[type="text"], input[type="number"], input[type="email"],
+  input[type="password"], textarea {
+    cursor: text !important;
+  }
+}

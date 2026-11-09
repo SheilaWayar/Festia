@@ -1,0 +1,18 @@
+body.cursor-festia, body.cursor-festia * { cursor: none !important; }
+body.cursor-festia input, body.cursor-festia textarea { cursor: text !important; }
+
+.cf-punto, .cf-aro {
+  position: fixed; top: 0; left: 0; z-index: 9999;
+  pointer-events: none; border-radius: 50%;
+}
+.cf-punto { width: 8px; height: 8px; margin: -4px 0 0 -4px; background: #e2bf75; }
+.cf-aro {
+  width: 34px; height: 34px; margin: -17px 0 0 -17px;
+  border: 1.5px solid rgba(226, 191, 117, 0.7);
+  transition: width .2s, height .2s, margin .2s, background .2s;
+}
+.cf-aro.grande {
+  width: 52px; height: 52px; margin: -26px 0 0 -26px;
+  background: rgba(226, 191, 117, 0.12);
+}
+@media (prefers-reduced-motion: reduce) { .cf-aro { transition: none; } }

@@ -1471,3 +1471,22 @@ select option:hover {
   .prov-titulo h3 { font-size: 28px; }
   .modal-content.prov-modal { max-height: 94dvh; }
 }
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+/* Tablet: 2 por fila */
+@media (max-width: 1100px) {
+  .cat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Celular: 1 por fila */
+@media (max-width: 560px) {
+  .cat-grid {
+    grid-template-columns: 1fr;
+  }
+}
