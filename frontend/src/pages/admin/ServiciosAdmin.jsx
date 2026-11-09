@@ -273,11 +273,42 @@ export default function ServiciosAdmin() {
     });
   };
 
-  const cambiarEstado = (p, estado) => run(async () => {
+  // Suspender pide el motivo: el proveedor lo ve y recibe la notificación por la campana
+  const suspender = (p) => {
+    const motivo = window.prompt("Motivo de la suspensión (lo ve el proveedor):");
+    if (motivo === null) return;
+    run(async () => {
+      const { error } = await supabase.from("proveedores")
+        .update({ estado: "suspendido", activo: false, motivo_rechazo: motivo || null })
+        .eq("id", p.id);
+      if (error) throw error;
+    });
+  };
+
+  const reactivar = (p) => run(async () => {
     const { error } = await supabase.from("proveedores")
-      .update({ estado, activo: estado === "aprobado" }).eq("id", p.id);
+      .update({ estado: "aprobado", activo: true, motivo_rechazo: null }).eq("id", p.id);
     if (error) throw error;
   });
+
+  // Elimina el proveedor y limpia sus fotos y documentos del storage
+  const eliminar = (p) => {
+    if (!window.confirm(`¿Eliminar "${p.nombre}" definitivamente? Se borran sus fotos, documentos y reseñas.`)) return;
+    run(async () => {
+      const { data: docs } = await supabase
+        .from("proveedores_documentos").select("path").eq("proveedor_id", p.id);
+
+      // .select() permite detectar si las políticas RLS bloquearon el borrado (0 filas)
+      const { data, error } = await supabase.from("proveedores").delete().eq("id", p.id).select();
+      if (error) throw error;
+      if (!data?.length) throw new Error("No se pudo eliminar: revisá las políticas de borrado.");
+
+      const fotos = (p.imagenes || []).map(rutaDeFoto).filter(Boolean);
+      if (fotos.length) await supabase.storage.from("proveedores-fotos").remove(fotos);
+      const rutas = (docs || []).map((d) => d.path);
+      if (rutas.length) await supabase.storage.from("proveedores-docs").remove(rutas);
+    });
+  };
 
   const tabBtn = (id, texto, n) => (
     <button type="button" onClick={() => { setTab(id); setEditando(null); }}
@@ -380,11 +411,15 @@ export default function ServiciosAdmin() {
                   <span style={ui.badge(p.estado === "aprobado" ? "#2e7d32" : "#b02a37")}>{p.estado}</span>
                 </div>
                 <Datos d={p} />
+                {p.estado === "suspendido" && p.motivo_rechazo && (
+                  <div style={ui.warn}>Motivo de la suspensión: {p.motivo_rechazo}</div>
+                )}
                 <div style={ui.row}>
                   <button style={ui.btn} onClick={() => setEditando(p.id)}>Editar</button>
                   {p.estado === "aprobado"
-                    ? <button style={ui.btnDanger} onClick={() => cambiarEstado(p, "suspendido")}>Suspender</button>
-                    : <button style={ui.btnPrimary} onClick={() => cambiarEstado(p, "aprobado")}>Reactivar</button>}
+                    ? <button style={ui.btnDanger} onClick={() => suspender(p)}>Suspender</button>
+                    : <button style={ui.btnPrimary} onClick={() => reactivar(p)}>Reactivar</button>}
+                  <button style={ui.btnDanger} onClick={() => eliminar(p)}>Eliminar</button>
                 </div>
               </div>
             )

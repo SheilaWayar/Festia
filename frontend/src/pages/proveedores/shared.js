@@ -4,7 +4,7 @@
 import { supabase } from "../../lib/supabase";
 export { supabase };
 
-// Las categorías son las de tu sección pública (fotografia, sonido, catering)
+// Las categorías son las de tu sección pública (fotografia, sonido, catering, planeadores)
 export { CATEGORIAS, etiquetaCategoria } from "../../services/serviciosApi";
 
 export const TERMINOS_VERSION = "v1";
@@ -37,6 +37,7 @@ export const DOCS_EXTRA = {
   ],
   fotografia: [],
   sonido: [],
+  planeadores: [],
 };
 
 export const DOC_SEGURO = {

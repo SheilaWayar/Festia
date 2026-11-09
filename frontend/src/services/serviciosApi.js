@@ -22,6 +22,13 @@ export const CATEGORIAS = [
     descripcion: "Menús, mesas dulces y servicio de comida para todo tipo de celebración.",
     cta: "Ver catering",
   },
+  {
+    valor: "planeadores",
+    etiqueta: "Planeadores de eventos",
+    titulo: "Planeadores de eventos",
+    descripcion: "Organizamos tu evento de principio a fin: coordinación, proveedores y todos los detalles.",
+    cta: "Ver planeadores",
+  },
 ];
 
 export const categoriaDe = (valor) => CATEGORIAS.find((c) => c.valor === valor) ?? null;

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase, subirFoto, etiquetaCategoria, MIN_FOTOS, MAX_FOTOS, fmtPrecio, ui } from "./shared";
+import AccionesServicio from "./AccionesServicio";
 
 export default function MiFichaProveedor() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [prov, setProv] = useState(null);
   const [pendiente, setPendiente] = useState(null);
@@ -98,61 +100,93 @@ export default function MiFichaProveedor() {
   }
 
   if (cargando) return <div style={ui.page}>Cargando…</div>;
-  if (!user) return <div style={ui.page}><div style={ui.warn}>Iniciá sesión para editar tu ficha.</div><Link to="/login" style={ui.link}>Iniciar sesión</Link></div>;
-  if (!prov) return <div style={ui.page}><p>Todavía no sos proveedor.</p><Link to="/proveedores/registro" style={ui.link}>Quiero ofrecer mis servicios</Link></div>;
+
+  if (!user)
+    return (
+      <div style={ui.page}>
+        <div style={ui.warn}>Iniciá sesión para editar tu ficha.</div>
+        <Link to="/login" style={ui.link}>Iniciar sesión</Link>
+      </div>
+    );
+
+  if (!prov)
+    return (
+      <div style={ui.page}>
+        <p>Todavía no sos proveedor.</p>
+        <Link to="/proveedores/registro" style={ui.link}>Quiero ofrecer mis servicios</Link>
+      </div>
+    );
+
   if (prov.estado !== "aprobado")
-    return <div style={ui.page}><div style={ui.warn}>Tu ficha está en estado <b>{prov.estado}</b>. Podés editarla cuando esté aprobada.</div><Link to="/proveedores/registro" style={ui.link}>Ver estado de mi solicitud</Link></div>;
+    return (
+      <div style={ui.page}>
+        <h1 style={ui.h1}>Mi ficha</h1>
+        {prov.estado === "pendiente" && (
+          <div style={ui.warn}>Tu ficha está en revisión. Podés editarla cuando esté aprobada.</div>
+        )}
+        <AccionesServicio proveedor={prov} onEliminado={() => navigate("/proveedores/registro")} />
+        <p><Link to="/proveedores/registro" style={ui.link}>Ver estado de mi solicitud</Link></p>
+      </div>
+    );
 
   return (
-    <form style={ui.page} onSubmit={enviar}>
-      <h1 style={ui.h1}>Mi ficha</h1>
-      <p style={ui.muted}>Categoría: {etiquetaCategoria(prov.categoria)} · Precio publicado: {fmtPrecio(prov.precio_desde)}</p>
+    <>
+      <form style={ui.page} onSubmit={enviar}>
+        <h1 style={ui.h1}>Mi ficha</h1>
+        <p style={ui.muted}>Categoría: {etiquetaCategoria(prov.categoria)} · Precio publicado: {fmtPrecio(prov.precio_desde)}</p>
 
-      {pendiente && (
-        <div style={ui.warn}>
-          Tenés cambios pendientes de aprobación. El público sigue viendo la versión anterior.{" "}
-          <button type="button" style={ui.btn} onClick={cancelarPendiente}>Cancelar cambios</button>
-        </div>
-      )}
-      {rechazado && (
-        <div style={ui.error}>El administrador rechazó tus últimos cambios.{rechazado.motivo && <> Motivo: <b>{rechazado.motivo}</b></>}</div>
-      )}
-      {msg && <div style={ui.okBox}>{msg}</div>}
+        {pendiente && (
+          <div style={ui.warn}>
+            Tenés cambios pendientes de aprobación. El público sigue viendo la versión anterior.{" "}
+            <button type="button" style={ui.btn} onClick={cancelarPendiente}>Cancelar cambios</button>
+          </div>
+        )}
+        {rechazado && (
+          <div style={ui.error}>El administrador rechazó tus últimos cambios.{rechazado.motivo && <> Motivo: <b>{rechazado.motivo}</b></>}</div>
+        )}
+        {msg && <div style={ui.okBox}>{msg}</div>}
 
-      <div style={ui.card}>
-        <label style={ui.label}>Nombre o marca</label>
-        <input style={ui.input} value={form.nombre} onChange={set("nombre")} />
-        <label style={ui.label}>Descripción</label>
-        <textarea style={{ ...ui.input, minHeight: 100 }} value={form.descripcion} onChange={set("descripcion")} />
-        <div style={ui.grid2}>
-          <div><label style={ui.label}>Precio desde (ARS)</label><input style={ui.input} type="number" min="0" value={form.precio_desde} onChange={set("precio_desde")} /></div>
-          <div><label style={ui.label}>WhatsApp (con código de área, solo números)</label><input style={ui.input} value={form.whatsapp} onChange={set("whatsapp")} /></div>
-          <div><label style={ui.label}>Instagram (usuario o enlace, opcional)</label><input style={ui.input} value={form.instagram} onChange={set("instagram")} /></div>
-          <div><label style={ui.label}>Zona donde trabajás</label><input style={ui.input} value={form.zona} onChange={set("zona")} /></div>
+        <div style={ui.card}>
+          <label style={ui.label}>Nombre o marca</label>
+          <input style={ui.input} value={form.nombre} onChange={set("nombre")} />
+          <label style={ui.label}>Descripción</label>
+          <textarea style={{ ...ui.input, minHeight: 100 }} value={form.descripcion} onChange={set("descripcion")} />
+          <div style={ui.grid2}>
+            <div><label style={ui.label}>Precio desde (ARS)</label><input style={ui.input} type="number" min="0" value={form.precio_desde} onChange={set("precio_desde")} /></div>
+            <div><label style={ui.label}>WhatsApp (con código de área, solo números)</label><input style={ui.input} value={form.whatsapp} onChange={set("whatsapp")} /></div>
+            <div><label style={ui.label}>Instagram (usuario o enlace, opcional)</label><input style={ui.input} value={form.instagram} onChange={set("instagram")} /></div>
+            <div><label style={ui.label}>Zona donde trabajás</label><input style={ui.input} value={form.zona} onChange={set("zona")} /></div>
+          </div>
         </div>
+
+        <div style={ui.card}>
+          <h2 style={ui.h2}>Fotos</h2>
+          <div style={ui.thumbs}>
+            {fotosActuales.map((url) => (
+              <div key={url} style={{ textAlign: "center" }}>
+                <img alt="" src={url} style={ui.thumb} /><br />
+                <button type="button" style={{ ...ui.btn, padding: "2px 8px" }} onClick={() => setFotosActuales(fotosActuales.filter((x) => x !== url))}>Quitar</button>
+              </div>
+            ))}
+            {fotosNuevas.map((f, i) => (
+              <div key={i} style={{ textAlign: "center" }}>
+                <img alt="" src={URL.createObjectURL(f)} style={ui.thumb} /><br />
+                <button type="button" style={{ ...ui.btn, padding: "2px 8px" }} onClick={() => setFotosNuevas(fotosNuevas.filter((_, j) => j !== i))}>Quitar</button>
+              </div>
+            ))}
+          </div>
+          <input type="file" accept="image/*" multiple onChange={(e) => setFotosNuevas([...fotosNuevas, ...Array.from(e.target.files)])} />
+        </div>
+
+        {error && <div style={ui.error}>{error}</div>}
+        <button style={ui.btnPrimary} disabled={enviando}>{enviando ? "Enviando…" : "Enviar cambios para aprobación"}</button>
+      </form>
+
+      {/* Fuera del <form> para que sus botones no disparen el envío */}
+      <div style={ui.page}>
+        <h2 style={ui.h2}>Zona de riesgo</h2>
+        <AccionesServicio proveedor={prov} onEliminado={() => navigate("/proveedores/registro")} />
       </div>
-
-      <div style={ui.card}>
-        <h2 style={ui.h2}>Fotos</h2>
-        <div style={ui.thumbs}>
-          {fotosActuales.map((url) => (
-            <div key={url} style={{ textAlign: "center" }}>
-              <img alt="" src={url} style={ui.thumb} /><br />
-              <button type="button" style={{ ...ui.btn, padding: "2px 8px" }} onClick={() => setFotosActuales(fotosActuales.filter((x) => x !== url))}>Quitar</button>
-            </div>
-          ))}
-          {fotosNuevas.map((f, i) => (
-            <div key={i} style={{ textAlign: "center" }}>
-              <img alt="" src={URL.createObjectURL(f)} style={ui.thumb} /><br />
-              <button type="button" style={{ ...ui.btn, padding: "2px 8px" }} onClick={() => setFotosNuevas(fotosNuevas.filter((_, j) => j !== i))}>Quitar</button>
-            </div>
-          ))}
-        </div>
-        <input type="file" accept="image/*" multiple onChange={(e) => setFotosNuevas([...fotosNuevas, ...Array.from(e.target.files)])} />
-      </div>
-
-      {error && <div style={ui.error}>{error}</div>}
-      <button style={ui.btnPrimary} disabled={enviando}>{enviando ? "Enviando…" : "Enviar cambios para aprobación"}</button>
-    </form>
+    </>
   );
 }

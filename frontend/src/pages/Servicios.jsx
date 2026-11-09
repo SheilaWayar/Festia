@@ -36,8 +36,8 @@ export default function Servicios() {
           <h2>Servicios <em>para tu celebración</em></h2>
         </div>
         <p>
-          Elegí una categoría y conocé a los profesionales recomendados: fotos, sonido y catering
-          para completar tu evento.
+          Elegí una categoría y conocé a los profesionales recomendados: fotos, sonido, catering
+          y planeadores para completar tu evento.
         </p>
       </div>
 
